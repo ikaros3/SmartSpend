@@ -64,8 +64,8 @@ const Chip = ({ label, active, onClick }) => (
   <button
     onClick={onClick}
     className={`px-3 py-1.5 rounded-full text-xs font-medium whitespace-nowrap transition-colors border ${active
-        ? "bg-blue-600 text-white border-blue-600 shadow-md"
-        : "bg-white text-gray-500 border-gray-200 hover:bg-gray-50"
+      ? "bg-blue-600 text-white border-blue-600 shadow-md"
+      : "bg-white text-gray-500 border-gray-200 hover:bg-gray-50"
       }`}
   >
     {label}
@@ -756,7 +756,7 @@ export default function App() {
             {/* Merged Title with whitespace-nowrap to keep it in one line */}
             <h1 className="text-lg font-bold tracking-tight flex items-center justify-center gap-1 text-white whitespace-nowrap">
               <Wallet size={20} className="text-blue-200" />
-              겸이네 가족 가계부
+              SmartSpend
             </h1>
 
             {/* Centered Year Selector */}
@@ -786,8 +786,8 @@ export default function App() {
                 key={month}
                 onClick={() => setCurrentMonth(month)}
                 className={`py-1.5 rounded text-xs font-bold transition-all duration-200 border flex items-center justify-center ${currentMonth === month
-                    ? "bg-white text-blue-600 border-white shadow-md scale-105"
-                    : "text-blue-100 border-blue-500 hover:bg-blue-500 hover:text-white"
+                  ? "bg-white text-blue-600 border-white shadow-md scale-105"
+                  : "text-blue-100 border-blue-500 hover:bg-blue-500 hover:text-white"
                   }`}
               >
                 {month}
@@ -815,8 +815,8 @@ export default function App() {
                   {prevMonthTotal > 0 && (
                     <div
                       className={`flex items-center text-xs font-bold px-3 py-1 rounded-full border ${diffAmount > 0
-                          ? "bg-red-50 text-red-600 border-red-100"
-                          : "bg-green-50 text-green-600 border-green-100"
+                        ? "bg-red-50 text-red-600 border-red-100"
+                        : "bg-green-50 text-green-600 border-green-100"
                         }`}
                     >
                       {diffAmount > 0 ? (
@@ -983,8 +983,8 @@ export default function App() {
                                   </span>
                                   <span
                                     className={`text-[10px] px-1 py-0 rounded border font-medium ${item.type === "fixed"
-                                        ? "bg-blue-50 text-blue-600 border-blue-200"
-                                        : "bg-orange-50 text-orange-600 border-orange-200"
+                                      ? "bg-blue-50 text-blue-600 border-blue-200"
+                                      : "bg-orange-50 text-orange-600 border-orange-200"
                                       }`}
                                   >
                                     {item.type === "fixed" ? "고정" : "변동"}
@@ -1117,12 +1117,12 @@ export default function App() {
                           <div className="w-full flex-1 flex items-end justify-center relative">
                             <div
                               className={`w-full max-w-[32px] rounded-t-sm transition-all duration-500 relative ${isActive
-                                  ? isOverLimit
-                                    ? "bg-pink-500 shadow-md"
-                                    : "bg-blue-600 shadow-md"
-                                  : isOverLimit
-                                    ? "bg-pink-200 group-hover:bg-pink-300"
-                                    : "bg-blue-100 group-hover:bg-blue-200"
+                                ? isOverLimit
+                                  ? "bg-pink-500 shadow-md"
+                                  : "bg-blue-600 shadow-md"
+                                : isOverLimit
+                                  ? "bg-pink-200 group-hover:bg-pink-300"
+                                  : "bg-blue-100 group-hover:bg-blue-200"
                                 }`}
                               style={{ height: `${Math.max(heightPct, 4)}%` }}
                             >
@@ -1133,8 +1133,8 @@ export default function App() {
                           </div>
                           <span
                             className={`text-[10px] mt-2 whitespace-nowrap ${isActive
-                                ? "font-bold text-gray-800"
-                                : "text-gray-400"
+                              ? "font-bold text-gray-800"
+                              : "text-gray-400"
                               }`}
                           >
                             {month.replace("월", "")}월
@@ -1401,8 +1401,8 @@ export default function App() {
                           setInputForm({ ...inputForm, category: cat.name })
                         }
                         className={`px-3 py-1.5 rounded-lg text-xs font-medium border transition-colors ${inputForm.category === cat.name
-                            ? "bg-blue-600 text-white border-blue-600"
-                            : "bg-white text-gray-600 border-gray-200 hover:bg-gray-50"
+                          ? "bg-blue-600 text-white border-blue-600"
+                          : "bg-white text-gray-600 border-gray-200 hover:bg-gray-50"
                           }`}
                       >
                         {cat.name}
@@ -1417,8 +1417,8 @@ export default function App() {
                       setInputForm({ ...inputForm, type: "variable" })
                     }
                     className={`flex-1 py-2 rounded-xl text-sm font-medium border ${inputForm.type === "variable"
-                        ? "bg-green-100 text-green-700 border-green-200"
-                        : "bg-white border-gray-200"
+                      ? "bg-green-100 text-green-700 border-green-200"
+                      : "bg-white border-gray-200"
                       }`}
                   >
                     변동비
@@ -1428,8 +1428,8 @@ export default function App() {
                       setInputForm({ ...inputForm, type: "fixed" })
                     }
                     className={`flex-1 py-2 rounded-xl text-sm font-medium border ${inputForm.type === "fixed"
-                        ? "bg-blue-100 text-blue-700 border-blue-200"
-                        : "bg-white border-gray-200"
+                      ? "bg-blue-100 text-blue-700 border-blue-200"
+                      : "bg-white border-gray-200"
                       }`}
                   >
                     고정비
