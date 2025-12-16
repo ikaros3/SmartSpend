@@ -48,9 +48,8 @@ const apiKey = ""; // API Key will be injected by the runtime environment
 const TabButton = ({ isActive, icon: Icon, label, onClick }) => (
   <button
     onClick={onClick}
-    className={`flex flex-col items-center justify-center w-full py-2 transition-all active:scale-95 ${
-      isActive ? "text-blue-600" : "text-gray-400 hover:text-gray-600"
-    }`}
+    className={`flex flex-col items-center justify-center w-full py-2 transition-all active:scale-95 ${isActive ? "text-blue-600" : "text-gray-400 hover:text-gray-600"
+      }`}
   >
     <Icon
       size={24}
@@ -64,11 +63,10 @@ const TabButton = ({ isActive, icon: Icon, label, onClick }) => (
 const Chip = ({ label, active, onClick }) => (
   <button
     onClick={onClick}
-    className={`px-3 py-1.5 rounded-full text-xs font-medium whitespace-nowrap transition-colors border ${
-      active
+    className={`px-3 py-1.5 rounded-full text-xs font-medium whitespace-nowrap transition-colors border ${active
         ? "bg-blue-600 text-white border-blue-600 shadow-md"
         : "bg-white text-gray-500 border-gray-200 hover:bg-gray-50"
-    }`}
+      }`}
   >
     {label}
   </button>
@@ -656,8 +654,7 @@ export default function App() {
           );
         } else {
           alert(
-            `데이터를 성공적으로 불러왔습니다.\n\n처리된 데이터 요약:\n${
-              summary || "없음"
+            `데이터를 성공적으로 불러왔습니다.\n\n처리된 데이터 요약:\n${summary || "없음"
             }`
           );
         }
@@ -788,11 +785,10 @@ export default function App() {
               <button
                 key={month}
                 onClick={() => setCurrentMonth(month)}
-                className={`py-1.5 rounded text-xs font-bold transition-all duration-200 border flex items-center justify-center ${
-                  currentMonth === month
+                className={`py-1.5 rounded text-xs font-bold transition-all duration-200 border flex items-center justify-center ${currentMonth === month
                     ? "bg-white text-blue-600 border-white shadow-md scale-105"
                     : "text-blue-100 border-blue-500 hover:bg-blue-500 hover:text-white"
-                }`}
+                  }`}
               >
                 {month}
               </button>
@@ -818,11 +814,10 @@ export default function App() {
                   {/* Prev Month Comparison - Only show if prev month has data */}
                   {prevMonthTotal > 0 && (
                     <div
-                      className={`flex items-center text-xs font-bold px-3 py-1 rounded-full border ${
-                        diffAmount > 0
+                      className={`flex items-center text-xs font-bold px-3 py-1 rounded-full border ${diffAmount > 0
                           ? "bg-red-50 text-red-600 border-red-100"
                           : "bg-green-50 text-green-600 border-green-100"
-                      }`}
+                        }`}
                     >
                       {diffAmount > 0 ? (
                         <TrendingUp size={14} className="mr-1" />
@@ -987,11 +982,10 @@ export default function App() {
                                     {item.category}
                                   </span>
                                   <span
-                                    className={`text-[10px] px-1 py-0 rounded border font-medium ${
-                                      item.type === "fixed"
+                                    className={`text-[10px] px-1 py-0 rounded border font-medium ${item.type === "fixed"
                                         ? "bg-blue-50 text-blue-600 border-blue-200"
                                         : "bg-orange-50 text-orange-600 border-orange-200"
-                                    }`}
+                                      }`}
                                   >
                                     {item.type === "fixed" ? "고정" : "변동"}
                                   </span>
@@ -1010,9 +1004,8 @@ export default function App() {
                             <div className="text-center flex items-center justify-center">
                               <span className="text-sm text-gray-600">
                                 {item.day
-                                  ? `${currentMonth.replace("월", "")}/${
-                                      item.day
-                                    }`
+                                  ? `${currentMonth.replace("월", "")}/${item.day
+                                  }`
                                   : ""}
                               </span>
                             </div>
@@ -1123,15 +1116,14 @@ export default function App() {
                         >
                           <div className="w-full flex-1 flex items-end justify-center relative">
                             <div
-                              className={`w-full max-w-[32px] rounded-t-sm transition-all duration-500 relative ${
-                                isActive
+                              className={`w-full max-w-[32px] rounded-t-sm transition-all duration-500 relative ${isActive
                                   ? isOverLimit
                                     ? "bg-pink-500 shadow-md"
                                     : "bg-blue-600 shadow-md"
                                   : isOverLimit
-                                  ? "bg-pink-200 group-hover:bg-pink-300"
-                                  : "bg-blue-100 group-hover:bg-blue-200"
-                              }`}
+                                    ? "bg-pink-200 group-hover:bg-pink-300"
+                                    : "bg-blue-100 group-hover:bg-blue-200"
+                                }`}
                               style={{ height: `${Math.max(heightPct, 4)}%` }}
                             >
                               <div className="absolute -top-5 left-1/2 transform -translate-x-1/2 text-[9px] font-bold text-gray-600 whitespace-nowrap">
@@ -1140,11 +1132,10 @@ export default function App() {
                             </div>
                           </div>
                           <span
-                            className={`text-[10px] mt-2 whitespace-nowrap ${
-                              isActive
+                            className={`text-[10px] mt-2 whitespace-nowrap ${isActive
                                 ? "font-bold text-gray-800"
                                 : "text-gray-400"
-                            }`}
+                              }`}
                           >
                             {month.replace("월", "")}월
                           </span>
@@ -1409,11 +1400,10 @@ export default function App() {
                         onClick={() =>
                           setInputForm({ ...inputForm, category: cat.name })
                         }
-                        className={`px-3 py-1.5 rounded-lg text-xs font-medium border transition-colors ${
-                          inputForm.category === cat.name
+                        className={`px-3 py-1.5 rounded-lg text-xs font-medium border transition-colors ${inputForm.category === cat.name
                             ? "bg-blue-600 text-white border-blue-600"
                             : "bg-white text-gray-600 border-gray-200 hover:bg-gray-50"
-                        }`}
+                          }`}
                       >
                         {cat.name}
                       </button>
@@ -1426,11 +1416,10 @@ export default function App() {
                     onClick={() =>
                       setInputForm({ ...inputForm, type: "variable" })
                     }
-                    className={`flex-1 py-2 rounded-xl text-sm font-medium border ${
-                      inputForm.type === "variable"
+                    className={`flex-1 py-2 rounded-xl text-sm font-medium border ${inputForm.type === "variable"
                         ? "bg-green-100 text-green-700 border-green-200"
                         : "bg-white border-gray-200"
-                    }`}
+                      }`}
                   >
                     변동비
                   </button>
@@ -1438,11 +1427,10 @@ export default function App() {
                     onClick={() =>
                       setInputForm({ ...inputForm, type: "fixed" })
                     }
-                    className={`flex-1 py-2 rounded-xl text-sm font-medium border ${
-                      inputForm.type === "fixed"
+                    className={`flex-1 py-2 rounded-xl text-sm font-medium border ${inputForm.type === "fixed"
                         ? "bg-blue-100 text-blue-700 border-blue-200"
                         : "bg-white border-gray-200"
-                    }`}
+                      }`}
                   >
                     고정비
                   </button>
@@ -1501,9 +1489,8 @@ export default function App() {
                 <div className="flex gap-2 mt-4">
                   <button
                     onClick={handleSaveItem}
-                    className={`bg-blue-600 text-white py-3.5 rounded-xl font-bold shadow-lg hover:bg-blue-700 transition-colors ${
-                      editingId ? "flex-[2]" : "w-full"
-                    }`}
+                    className={`bg-blue-600 text-white py-3.5 rounded-xl font-bold shadow-lg hover:bg-blue-700 transition-colors ${editingId ? "flex-[2]" : "w-full"
+                      }`}
                   >
                     {editingId ? "수정 완료" : "저장하기"}
                   </button>
