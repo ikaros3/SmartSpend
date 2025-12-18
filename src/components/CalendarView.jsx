@@ -1,0 +1,148 @@
+import React, { useState, useMemo } from 'react';
+import { Calendar } from 'lucide-react';
+
+export default function CalendarView({
+    currentYear,
+    currentMonth,
+    monthlyData,
+    categories,
+    formatCurrency
+}) {
+    const [selectedDay, setSelectedDay] = useState(new Date().getDate());
+
+    const monthNum = parseInt(currentMonth.replace("월", ""));
+
+    // 현재 월의 데이터 조회 (연도 포함 키 사용)
+    const currentDataKey = `${currentYear}-${monthNum}월`;
+    const currentData = monthlyData[currentDataKey] || { items: [] };
+
+    // 달력 데이터 생성
+    const calendarData = useMemo(() => {
+        const daysInMonth = new Date(currentYear, monthNum, 0).getDate();
+        const startDay = new Date(currentYear, monthNum - 1, 1).getDay(); // 0: 일요일
+
+        const days = [];
+
+        // 시작 요일 맞추기 위한 빈 칸
+        for (let i = 0; i < startDay; i++) {
+            days.push(null);
+        }
+
+        // 날짜 채우기
+        for (let day = 1; day <= daysInMonth; day++) {
+            const items = currentData.items.filter(item => item.day === day);
+            days.push({ day, items });
+        }
+
+        return days;
+    }, [currentYear, monthNum, currentData]);
+
+    // 선택된 날짜의 아이템 필터링
+    const selectedDayItems = useMemo(() => {
+        if (!selectedDay) return [];
+        return currentData.items.filter(item => item.day === selectedDay);
+    }, [selectedDay, currentData]);
+
+    return (
+        <div className="bg-white rounded-2xl p-5 shadow-sm border border-gray-100">
+            <h3 className="font-bold text-gray-800 mb-4 text-sm flex items-center">
+                <Calendar size={16} className="text-blue-500 mr-2" />
+                {currentYear}년 {currentMonth} 달력
+            </h3>
+
+            {/* 요일 헤더 */}
+            <div className="grid grid-cols-7 gap-1 mb-2">
+                {['일', '월', '화', '수', '목', '금', '토'].map((day, idx) => (
+                    <div key={idx} className="text-center text-xs font-bold text-gray-400 py-1">
+                        {day}
+                    </div>
+                ))}
+            </div>
+
+            {/* 달력 그리드 */}
+            <div className="grid grid-cols-7 gap-1">
+                {calendarData.map((dayData, idx) => (
+                    <div key={idx} className="aspect-square">
+                        {dayData ? (
+                            <button
+                                onClick={() => setSelectedDay(dayData.day)}
+                                className={`w-full h-full rounded-lg flex flex-col items-center justify-center transition-all relative ${selectedDay === dayData.day
+                                        ? 'bg-blue-500 text-white shadow-md scale-105'
+                                        : dayData.items.length > 0
+                                            ? 'bg-gradient-to-br from-pink-50 to-purple-50 text-gray-800 hover:shadow-md hover:scale-105'
+                                            : 'bg-gray-50 text-gray-600 hover:bg-gray-100'
+                                    }`}
+                            >
+                                <span className={`text-xs font-bold ${selectedDay === dayData.day ? 'text-white' : ''
+                                    }`}>
+                                    {dayData.day}
+                                </span>
+                                {dayData.items.length > 0 && (
+                                    <div className="absolute bottom-1 flex gap-0.5">
+                                        {dayData.items.slice(0, 3).map((item, itemIdx) => {
+                                            const cat = categories.find(c => c.name === item.category) || { icon: '•', chartColor: 'text-gray-400' };
+                                            // 차트 컬러에서 텍스트 색상만 추출하거나 기본값 사용
+                                            const colorClass = selectedDay === dayData.day ? 'text-white' : cat.chartColor;
+                                            return (
+                                                <span key={itemIdx} className={`text-[8px] ${colorClass}`}>
+                                                    {cat.icon}
+                                                </span>
+                                            );
+                                        })}
+                                        {dayData.items.length > 3 && (
+                                            <span className={`text-[6px] font-bold ${selectedDay === dayData.day ? 'text-white' : 'text-gray-500'
+                                                }`}>
+                                                +{dayData.items.length - 3}
+                                            </span>
+                                        )}
+                                    </div>
+                                )}
+                            </button>
+                        ) : (
+                            <div className="w-full h-full"></div>
+                        )}
+                    </div>
+                ))}
+            </div>
+
+            {/* 선택된 날짜의 지출 내역 */}
+            {selectedDay && (
+                <div className="mt-4 pt-4 border-t border-gray-100 animate-in fade-in slide-in-from-top-2 duration-300">
+                    <h4 className="font-bold text-gray-800 mb-3 text-sm">
+                        {currentMonth.replace('월', '')}/{selectedDay}일 지출 내역
+                    </h4>
+                    {selectedDayItems.length === 0 ? (
+                        <p className="text-xs text-gray-400 text-center py-4">
+                            이 날짜에 지출 내역이 없습니다.
+                        </p>
+                    ) : (
+                        <div className="space-y-2">
+                            {selectedDayItems.map((item, idx) => {
+                                const cat = categories.find(c => c.name === item.category) || { icon: '⋯', chartColor: 'text-gray-400' };
+                                return (
+                                    <div key={idx} className="flex justify-between items-center p-2 rounded-lg bg-gradient-to-r from-blue-50 to-purple-50">
+                                        <div className="flex items-center gap-2">
+                                            <span className={`text-lg ${cat.chartColor}`}>{cat.icon}</span>
+                                            <div>
+                                                <p className="text-sm font-bold text-gray-800">{item.name}</p>
+                                                <p className="text-xs text-gray-500">{item.category}</p>
+                                            </div>
+                                        </div>
+                                        <p className="font-bold text-gray-900">-{formatCurrency(item.amount)}</p>
+                                    </div>
+                                );
+                            })}
+                            <div className="mt-2 pt-2 border-t border-gray-200 text-right">
+                                <p className="text-xs text-gray-600">
+                                    합계: <span className="font-bold text-blue-600">
+                                        {formatCurrency(selectedDayItems.reduce((sum, item) => sum + item.amount, 0))}
+                                    </span>
+                                </p>
+                            </div>
+                        </div>
+                    )}
+                </div>
+            )}
+        </div>
+    );
+}

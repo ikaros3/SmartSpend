@@ -1,5 +1,6 @@
 import React, { useState, useMemo, useEffect, useRef } from "react";
 import * as XLSX from "xlsx";
+import CalendarView from "./components/CalendarView";
 import {
   formatNumber,
   formatCurrency,
@@ -970,6 +971,17 @@ export default function App() {
                     남은 고정 지출이 없습니다.
                   </div>
                 )}
+              </div>
+
+              {/* Calendar Component */}
+              <div className="mt-5 pb-5">
+                <CalendarView
+                  currentYear={currentYear}
+                  currentMonth={currentMonth}
+                  monthlyData={monthlyData}
+                  categories={categories}
+                  formatCurrency={formatCurrency}
+                />
               </div>
             </div>
           )}
