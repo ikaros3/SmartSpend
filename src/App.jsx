@@ -177,6 +177,50 @@ export default function App() {
     }
   }, []); // Empty dependency array ensures this runs only once on mount
 
+  // Legacy Data Migration
+  useEffect(() => {
+    if (Object.keys(dbData).length === 0) return;
+
+    let hasLegacy = false;
+    const newDbData = JSON.parse(JSON.stringify(dbData));
+    const thisYear = new Date().getFullYear();
+
+    Object.keys(newDbData).forEach((key) => {
+      // "1월" 형식의 키를 찾음 (연도가 없는 경우)
+      if (/^\d+월$/.test(key)) {
+        hasLegacy = true;
+        const newKey = `${thisYear}-${key}`;
+        if (!newDbData[newKey]) {
+          newDbData[newKey] = newDbData[key];
+        } else {
+          // 이미 키가 있으면 아이템 병합
+          newDbData[newKey].items = [
+            ...newDbData[newKey].items,
+            ...newDbData[key].items,
+          ];
+        }
+        delete newDbData[key];
+      }
+    });
+
+    if (hasLegacy) {
+      setDbData(newDbData);
+      console.log("Legacy data migrated to current year");
+    }
+  }, [dbData]);
+
+  // Auto-save data when dbData or categories change
+  useEffect(() => {
+    if (Object.keys(dbData).length > 0 || categories.length > 0) {
+      try {
+        const dataToSave = { dbData, categories };
+        localStorage.setItem("budgetData", JSON.stringify(dataToSave));
+      } catch (error) {
+        console.error("Failed to auto-save data", error);
+      }
+    }
+  }, [dbData, categories]);
+
   // Input Form State
   const [inputForm, setInputForm] = useState({
     date: new Date().toISOString().slice(0, 10),
@@ -200,21 +244,58 @@ export default function App() {
     return computed;
   }, [dbData]);
 
-  const currentData = monthlyData[currentMonth] || { total: 0, items: [] };
+
+
+  const currentDataKey = `${currentYear}-${parseInt(
+    currentMonth.replace("월", "")
+  )}\uC6D4`;
+  const currentData = monthlyData[currentDataKey] || { total: 0, items: [] };
 
   // --- Logic for Home Dashboard ---
   const prevMonthIndex = fullMonths.indexOf(currentMonth) - 1;
   const prevMonthName = prevMonthIndex >= 0 ? fullMonths[prevMonthIndex] : null;
-  const prevMonthTotal = (monthlyData[prevMonthName] || { total: 0 }).total;
+
+  // 이전 달 데이터도 연도 고려 필요 (간소화를 위해 현재 연도의 이전 달로 가정)
+  const prevDataKey =
+    prevMonthIndex >= 0
+      ? `${currentYear}-${parseInt(fullMonths[prevMonthIndex].replace("월", ""))}\uC6D4`
+      : null;
+  const prevMonthTotal =
+    (monthlyData[prevDataKey] || { total: 0 }).total;
   const diffAmount = currentData.total - prevMonthTotal;
 
   // Upcoming Fixed Expenses
-  const todayDate = 10;
   const upcomingFixed = useMemo(() => {
+    const now = new Date();
+    const todayDate = now.getDate();
+    const currentRealMonth = now.getMonth() + 1;
+    const selectedMonthNum = parseInt(currentMonth.replace("월", ""));
+    const selectedYear = currentYear;
+    const currentRealYear = now.getFullYear();
+
+    // 1. 과거: 선택된 연도가 작거나, 같은 연도인데 지난 달인 경우 -> 빈 배열
+    if (
+      selectedYear < currentRealYear ||
+      (selectedYear === currentRealYear && selectedMonthNum < currentRealMonth)
+    ) {
+      return [];
+    }
+
+    // 2. 현재: 이번 달인 경우 -> 오늘 이후(포함) 항목만 표시
+    if (
+      selectedYear === currentRealYear &&
+      selectedMonthNum === currentRealMonth
+    ) {
+      return currentData.items
+        .filter((i) => i.type === "fixed" && i.day && i.day >= todayDate)
+        .sort((a, b) => a.day - b.day);
+    }
+
+    // 3. 미래: 선택된 연도가 크거나, 같은 연도인데 미래 달인 경우 -> 모든 고정비 표시
     return currentData.items
-      .filter((i) => i.type === "fixed" && i.day >= todayDate)
+      .filter((i) => i.type === "fixed" && i.day)
       .sort((a, b) => a.day - b.day);
-  }, [currentData]);
+  }, [currentData, currentMonth, currentYear]);
 
   // --- Logic for Ledger Filter ---
   const [typeFilter, setTypeFilter] = useState("all");
@@ -356,13 +437,18 @@ export default function App() {
       amount: parseInt(inputForm.amount),
       type: inputForm.type,
       day: parseInt(inputForm.date.split("-")[2]),
+      fullDate: inputForm.date, // Add full date for reference
       details: inputForm.details,
       memo: inputForm.memo,
     };
 
     setDbData((prev) => {
       const newData = JSON.parse(JSON.stringify(prev));
-      const targetMonthKey = `${parseInt(inputForm.date.split("-")[1])}월`;
+      // Generate key with Year-Month format (e.g., "2024-12월")
+      const dateParts = inputForm.date.split("-");
+      const targetMonthKey = `${dateParts[0]}-${parseInt(
+        dateParts[1]
+      )}\uC6D4`;
 
       if (editingId) {
         for (const month in newData) {
@@ -862,7 +948,7 @@ export default function App() {
                             {formatCurrency(item.amount)}
                           </p>
                           <p className="text-xs text-red-500">
-                            D-{Math.max(0, item.day - todayDate)}
+                            D-{Math.max(0, item.day - new Date().getDate())}
                           </p>
                         </div>
                       </div>
@@ -1103,7 +1189,8 @@ export default function App() {
                   </div>
                   <div className="absolute inset-0 flex items-end justify-between gap-1 pb-2 pl-8">
                     {fullMonths.map((month) => {
-                      const data = monthlyData[month] || { total: 0 };
+                      const dataKey = `${currentYear}-${parseInt(month.replace("월", ""))}\uC6D4`;
+                      const data = monthlyData[dataKey] || { total: 0 };
                       const total = data.total;
                       const isActive = month === currentMonth;
                       const heightPct = getPct(total);
