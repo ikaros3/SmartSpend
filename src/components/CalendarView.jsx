@@ -63,7 +63,7 @@ export default function CalendarView({
             {/* 달력 그리드 */}
             <div className="grid grid-cols-7 gap-0.5">
                 {calendarData.map((dayData, idx) => (
-                    <div key={idx} className="h-16">
+                    <div key={idx} className="h-12">
                         {dayData ? (
                             <button
                                 onClick={() => setSelectedDay(dayData.day)}
