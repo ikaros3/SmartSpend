@@ -47,13 +47,13 @@ export default function CalendarView({
         <div className="bg-white rounded-2xl p-4 shadow-sm border border-gray-100">
             <h3 className="font-bold text-gray-800 mb-2 text-sm flex items-center">
                 <Calendar size={16} className="text-blue-500 mr-2" />
-                {currentYear}년 {currentMonth} 달력
+                {currentYear}년 {currentMonth}
             </h3>
 
             {/* 요일 헤더 */}
             <div className="grid grid-cols-7 gap-0.5 mb-1">
                 {['일', '월', '화', '수', '목', '금', '토'].map((day, idx) => (
-                    <div key={idx} className={`text-center text-[10px] font-bold py-1 ${idx === 0 ? 'text-red-400' : idx === 6 ? 'text-blue-400' : 'text-gray-400'
+                    <div key={idx} className={`text-center text-[17px] font-bold py-1 ${idx === 0 ? 'text-red-400' : idx === 6 ? 'text-blue-400' : 'text-gray-400'
                         }`}>
                         {day}
                     </div>
@@ -63,23 +63,23 @@ export default function CalendarView({
             {/* 달력 그리드 */}
             <div className="grid grid-cols-7 gap-0.5">
                 {calendarData.map((dayData, idx) => (
-                    <div key={idx} className="aspect-square">
+                    <div key={idx} className="h-16">
                         {dayData ? (
                             <button
                                 onClick={() => setSelectedDay(dayData.day)}
-                                className={`w-full h-full rounded-md flex flex-col items-center justify-center transition-all relative border ${selectedDay === dayData.day
-                                        ? 'bg-blue-600 text-white border-blue-600 shadow-md ring-1 ring-blue-200 z-10'
-                                        : dayData.items.length > 0
-                                            ? 'bg-indigo-50 text-indigo-900 border-indigo-100 font-semibold hover:bg-indigo-100 hover:border-indigo-200'
-                                            : 'bg-white text-gray-400 border-transparent hover:bg-gray-50 hover:border-gray-200'
+                                className={`w-full h-full rounded-md flex flex-col items-center justify-start pt-1 transition-all relative border ${selectedDay === dayData.day
+                                    ? 'bg-blue-600 text-white border-blue-600 shadow-md ring-1 ring-blue-200 z-10'
+                                    : dayData.items.length > 0
+                                        ? 'bg-indigo-50 text-indigo-900 border-indigo-100 font-semibold hover:bg-indigo-100 hover:border-indigo-200'
+                                        : 'bg-white text-gray-400 border-transparent hover:bg-gray-50 hover:border-gray-200'
                                     }`}
                             >
-                                <span className={`text-xs ${selectedDay === dayData.day ? 'font-bold' : ''
+                                <span className={`text-[16px] ${selectedDay === dayData.day ? 'font-bold' : ''
                                     }`}>
                                     {dayData.day}
                                 </span>
                                 {dayData.items.length > 0 && (
-                                    <div className="absolute bottom-0.5 flex gap-0.5 justify-center w-full px-0.5">
+                                    <div className="absolute bottom-1 flex gap-0.5 justify-center w-full px-0.5">
                                         {dayData.items.slice(0, 3).map((item, itemIdx) => {
                                             const cat = categories.find(c => c.name === item.category) || { icon: '•', chartColor: 'text-gray-400' };
                                             // 선택되지 않았을 때 아이콘 색상을 좀 더 진하게 조정할 필요가 있음
