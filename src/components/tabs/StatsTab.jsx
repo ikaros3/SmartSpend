@@ -29,24 +29,68 @@ const StatsTab = ({ currentYear, currentMonth, setCurrentMonth, monthlyData, cur
             <div className="bg-white p-5 rounded-2xl shadow-sm border border-gray-100 flex flex-col">
                 <h2 className="text-lg font-bold text-gray-800 mb-4">월별 지출 추이</h2>
                 <div className="relative h-64 w-full mt-4">
-                    <div className="absolute inset-x-0 bottom-0 top-0 flex flex-col justify-between pointer-events-none">
-                        {[1500, 1000, 500].map(v => (
-                            <div key={v} className="relative w-full border-b border-dashed border-gray-200" style={{ height: `${100 - getPct(v * 10000)}%` }}>
-                                <span className="absolute -top-3 left-0 text-[10px] text-gray-400 bg-white pr-1">{v}만</span>
-                            </div>
-                        ))}
+                    <div className="absolute inset-0 flex flex-col justify-end pointer-events-none">
+                        <div
+                            className="absolute w-full border-b border-dashed border-gray-200"
+                            style={{ bottom: `${getPct(5000000)}%` }}
+                        >
+                            <span className="absolute -top-3 left-0 text-[10px] text-gray-400 bg-white pr-1">
+                                500만
+                            </span>
+                        </div>
+                        <div
+                            className="absolute w-full border-b border-red-300 border-solid"
+                            style={{ bottom: `${getPct(10000000)}%` }}
+                        >
+                            <span className="absolute -top-3 left-0 text-[10px] font-bold text-red-400 bg-white pr-1">
+                                1,000만
+                            </span>
+                        </div>
+                        <div
+                            className="absolute w-full border-b border-dashed border-gray-200"
+                            style={{ bottom: `${getPct(15000000)}%` }}
+                        >
+                            <span className="absolute -top-3 left-0 text-[10px] text-gray-400 bg-white pr-1">
+                                1,500만
+                            </span>
+                        </div>
                     </div>
                     <div className="absolute inset-0 flex items-end justify-between gap-1 pb-2 pl-8">
-                        {fullMonths.map(m => {
-                            const total = (monthlyData[`${currentYear}-${parseInt(m)}\uC6D4`] || { total: 0 }).total;
+                        {fullMonths.map((m) => {
+                            const total = (
+                                monthlyData[`${currentYear}-${parseInt(m)}\uC6D4`] || {
+                                    total: 0,
+                                }
+                            ).total;
                             return (
-                                <div key={m} className="flex flex-col items-center justify-end h-full flex-1 group cursor-pointer" onClick={() => setCurrentMonth(m)}>
+                                <div
+                                    key={m}
+                                    className="flex flex-col items-center justify-end h-full flex-1 group cursor-pointer"
+                                    onClick={() => setCurrentMonth(m)}
+                                >
                                     <div className="w-full flex-1 flex items-end justify-center relative">
-                                        <div className={`w-full max-w-[32px] rounded-t-sm transition-all duration-500 relative ${m === currentMonth ? (total > 10000000 ? "bg-pink-500" : "bg-blue-600") : (total > 10000000 ? "bg-pink-100" : "bg-blue-100")}`} style={{ height: `${Math.max(getPct(total), 4)}%` }}>
-                                            <div className="absolute -top-5 left-1/2 -translate-x-1/2 text-[9px] font-bold text-gray-600">{(total / 10000).toFixed(0)}만</div>
+                                        <div
+                                            className={`w-full max-w-[32px] rounded-t-sm transition-all duration-500 relative ${m === currentMonth
+                                                ? total > 10000000
+                                                    ? "bg-pink-500 shadow-md"
+                                                    : "bg-blue-600 shadow-md"
+                                                : total > 10000000
+                                                    ? "bg-pink-100 group-hover:bg-pink-200"
+                                                    : "bg-blue-100 group-hover:bg-blue-200"
+                                                }`}
+                                            style={{ height: `${Math.max(getPct(total), 4)}%` }}
+                                        >
+                                            <div className="absolute -top-5 left-1/2 -translate-x-1/2 text-[9px] font-bold text-gray-600 whitespace-nowrap">
+                                                {formatNumber(Math.floor(total / 10000))}만원
+                                            </div>
                                         </div>
                                     </div>
-                                    <span className={`text-[10px] mt-2 ${m === currentMonth ? "font-bold text-gray-800" : "text-gray-400"}`}>{m.replace("월", "")}월</span>
+                                    <span
+                                        className={`text-[10px] mt-2 whitespace-nowrap ${m === currentMonth ? "font-bold text-gray-800" : "text-gray-400"
+                                            }`}
+                                    >
+                                        {m.replace("월", "")}월
+                                    </span>
                                 </div>
                             );
                         })}
