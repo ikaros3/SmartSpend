@@ -11,10 +11,10 @@ export default function CalendarView({
     const [selectedDay, setSelectedDay] = useState(new Date().getDate());
 
     const monthNum = parseInt(currentMonth.replace("월", ""));
-
-    // 현재 월의 데이터 조회 (연도 포함 키 사용)
-    const currentDataKey = `${currentYear}-${monthNum}월`;
-    const currentData = monthlyData[currentDataKey] || { items: [] };
+    const currentData = useMemo(() => {
+        // useBudget의 monthlyData는 12개월 배열이므로 인덱스로 접근
+        return monthlyData[monthNum - 1] || { items: [] };
+    }, [monthlyData, monthNum]);
 
     // 달력 데이터 생성
     const calendarData = useMemo(() => {
