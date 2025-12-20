@@ -610,12 +610,25 @@ export default function App() {
       }
 
       try {
-        const newDbData = {};
-        const allMonths = Array.from({ length: 12 }, (_, i) => `${i + 1}월`);
-        allMonths.forEach((m) => (newDbData[m] = { items: [] }));
+        // Prepare to merge with existing data
+        const mergedDbData = JSON.parse(JSON.stringify(dbData));
+        const mergedCategories = [...categories];
 
+        // Helper to create a composite key for deduplication
+        const getItemKey = (item) => {
+          return `${item.category}|${item.name || item.details}|${item.amount}|${item.type}|${item.day}|${item.memo || ""}`;
+        };
+
+        // Get all existing keys per month to avoid duplicates
+        const existingKeysMap = {};
+        for (const mKey in mergedDbData) {
+          existingKeysMap[mKey] = new Set(mergedDbData[mKey].items.map(getItemKey));
+        }
+
+        let addedCount = 0;
+        let duplicateCount = 0;
         let fileYear = null;
-        let currentIdCounter = 1;
+        let currentIdCounter = Date.now();
         const skippedSheets = [];
 
         for (const wsname of wb.SheetNames) {
@@ -643,16 +656,20 @@ export default function App() {
 
           if (!yearMatch || !monthMatch) {
             skippedSheets.push(
-              `${wsname} (A1셀의 년월 형식이 'YYYY년 MM월'이 아님)`
+              `${wsname} (A1셀의 년월 형식이 아님)`
             );
             continue;
           }
 
           const sheetYear = parseInt(yearMatch[1]);
-          const sheetMonthStr = `${parseInt(monthMatch[1])}월`;
+          const sheetMonthNum = parseInt(monthMatch[1]);
+          const targetMonthKey = `${sheetYear}-${sheetMonthNum}월`;
 
-          if (!fileYear) {
-            fileYear = sheetYear;
+          if (!fileYear) fileYear = sheetYear;
+
+          if (!mergedDbData[targetMonthKey]) {
+            mergedDbData[targetMonthKey] = { items: [] };
+            existingKeysMap[targetMonthKey] = new Set();
           }
 
           for (let i = 2; i < rawData.length; i++) {
@@ -662,29 +679,24 @@ export default function App() {
             const categoryName = row[0];
             const itemName = row[1];
             const itemTypeRaw = row[2];
-            const amount = parseInt(row[3]);
+            const rawAmount = row[3];
+            const amount = typeof rawAmount === "string"
+              ? parseInt(rawAmount.replace(/,/g, ""))
+              : parseInt(rawAmount);
             const dateValue = row[4];
             const memo = row[5] || "";
 
             let day;
             if (dateValue instanceof Date) {
               day = dateValue.getDate();
-            } else if (
-              typeof dateValue === "string" &&
-              dateValue.includes("/")
-            ) {
+            } else if (typeof dateValue === "string" && dateValue.includes("/")) {
               day = parseInt(dateValue.split("/")[1]);
             } else {
               day = parseInt(dateValue);
             }
 
-            if (isNaN(day)) {
-              day = null;
-            }
-
-            if (!categoryName || !itemName || isNaN(amount) || amount <= 0) {
-              continue;
-            }
+            if (isNaN(day)) day = null;
+            if (!categoryName || !itemName || isNaN(amount) || amount <= 0) continue;
 
             const itemType = itemTypeRaw === "고정비" ? "fixed" : "variable";
 
@@ -699,61 +711,55 @@ export default function App() {
               memo: memo,
             };
 
-            if (newDbData[sheetMonthStr]) {
-              newDbData[sheetMonthStr].items.push(newItem);
+            const key = getItemKey(newItem);
+            if (existingKeysMap[targetMonthKey].has(key)) {
+              duplicateCount++;
+              continue;
+            }
+
+            // New Item
+            mergedDbData[targetMonthKey].items.push(newItem);
+            existingKeysMap[targetMonthKey].add(key);
+            addedCount++;
+
+            // Category check
+            if (!mergedCategories.some(c => c.name === categoryName)) {
+              const palette = colorPalette[mergedCategories.length % colorPalette.length];
+              mergedCategories.push({
+                id: `c${mergedCategories.length + 1}_${Date.now()}`,
+                name: categoryName,
+                ...palette
+              });
             }
           }
         }
 
-        const allItems = Object.values(newDbData).flatMap(
-          (month) => month.items
-        );
-        const uniqueCategoryNames = [
-          ...new Set(allItems.map((item) => item.category)),
-        ];
+        setCategories(mergedCategories);
+        setDbData(mergedDbData);
+        if (fileYear) setCurrentYear(fileYear);
 
-        const newCategories = uniqueCategoryNames.map((name, index) => {
-          const palette = colorPalette[index % colorPalette.length];
-          return {
-            id: `c${index + 1}`,
-            name: name,
-            ...palette,
-          };
-        });
-
-        setCategories(newCategories);
-
-        const summary = Object.entries(newDbData)
-          .filter(([, data]) => data.items.length > 0)
-          .map(([month, data]) => `${month}: ${data.items.length}개 항목`)
-          .join("\n");
-
-        setDbData(newDbData);
-        if (fileYear) {
-          setCurrentYear(fileYear);
-        }
-
+        const msg = `데이터 불러오기 완료!\n- 새 항목: ${addedCount}개 추가\n- 중복 항목: ${duplicateCount}개 제외`;
         if (skippedSheets.length > 0) {
-          alert(
-            `데이터를 불러왔습니다. 하지만 다음 시트는 건너뛰었습니다:\n\n${skippedSheets.join(
-              "\n"
-            )}\n\n처리된 데이터 요약:\n${summary || "없음"}`
-          );
+          alert(`${msg}\n\n건너뛴 시트:\n${skippedSheets.join("\n")}`);
         } else {
-          alert(
-            `데이터를 성공적으로 불러왔습니다.\n\n처리된 데이터 요약:\n${summary || "없음"
-            }`
-          );
+          alert(msg);
         }
       } catch (error) {
-        console.error("Error processing data from Excel sheet:", error);
-        alert(
-          "Excel 시트에서 데이터를 처리하는 중 오류가 발생했습니다. 데이터 구조를 확인해주세요."
-        );
+        console.error("Error processing Excel:", error);
+        alert("Excel 처리 중 오류가 발생했습니다.");
       }
     };
     reader.readAsArrayBuffer(file);
     e.target.value = null;
+  };
+
+  const handleResetData = () => {
+    if (confirm("정말 모든 데이터를 초기화하시겠습니까?\n지출 내역과 카테고리가 모두 삭제되며, 복구할 수 없습니다.")) {
+      setDbData({});
+      setCategories([]);
+      localStorage.removeItem("budgetData");
+      alert("모든 데이터가 초기화되었습니다.");
+    }
   };
 
   const handleSaveData = () => {
@@ -788,12 +794,16 @@ export default function App() {
         (a, b) => parseInt(a) - parseInt(b)
       );
 
-      for (const month of sortedMonths) {
-        const monthData = dbData[month];
+      for (const monthKey of sortedMonths) {
+        const monthData = dbData[monthKey];
         if (!monthData || monthData.items.length === 0) continue;
 
+        // monthKey is like "2025-6월"
+        const [yearStr, monthWithText] = monthKey.split("-");
+        const monthClean = monthWithText.replace("월", "");
+
         const wsData = [
-          [`${year}년 ${month}`],
+          [`${yearStr}년 ${monthClean}월`],
           ["분류", "내용", "구분", "금액", "날짜", "메모"],
         ];
 
@@ -804,14 +814,16 @@ export default function App() {
               item.category,
               item.name,
               item.type === "fixed" ? "고정비" : "변동비",
-              item.amount,
-              item.day ? `${parseInt(month)}/${item.day}` : "",
+              item.amount.toLocaleString(), // 천 단위 콤마 추가
+              item.day ? `${monthClean}/${item.day}` : "", // MM/DD 형식
               item.memo || "",
             ]);
           });
 
         const ws = XLSX.utils.aoa_to_sheet(wsData);
-        XLSX.utils.book_append_sheet(wb, ws, month);
+        // 시트 이름: 2025-6월 -> 2025년6월
+        const sheetName = monthKey.replace("-", "년");
+        XLSX.utils.book_append_sheet(wb, ws, sheetName);
       }
 
       if (wb.SheetNames.length === 0) {
@@ -1415,6 +1427,18 @@ export default function App() {
                       />
                       <ChevronRight size={16} className="text-gray-400" />
                     </label>
+                    <div
+                      onClick={handleResetData}
+                      className="p-4 flex justify-between items-center hover:bg-red-50 cursor-pointer"
+                    >
+                      <div className="flex items-center gap-3">
+                        <Trash2 size={18} className="text-red-500" />
+                        <span className="text-sm font-medium text-red-600">
+                          데이터 전체 초기화
+                        </span>
+                      </div>
+                      <ChevronRight size={16} className="text-red-400" />
+                    </div>
                   </div>
                 </section>
               </div>
