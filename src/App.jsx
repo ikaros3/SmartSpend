@@ -17,6 +17,9 @@ import SettingsView from "./components/views/SettingsView";
 import ItemInputModal from "./components/modals/ItemInputModal";
 import CategoryManageModal from "./components/modals/CategoryManageModal";
 
+// Common
+import Toast from "./components/common/Toast";
+
 export default function App() {
   const { activeTab } = useBudgetContext();
   const { openCreateModal } = useBudget();
@@ -60,6 +63,9 @@ export default function App() {
         {/* Modals */}
         <ItemInputModal />
         <CategoryManageModal />
+
+        {/* Toast Notifications */}
+        <Toast />
       </div>
     </div>
   );

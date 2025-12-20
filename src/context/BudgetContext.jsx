@@ -29,10 +29,14 @@ export const BudgetProvider = ({ children }) => {
                 if (loadedDbData && loadedCategories) {
                     setDbData(loadedDbData);
                     setCategories(loadedCategories);
-                    if (!alertShownRef.current) {
-                        alert("데이터 로딩이 완료되었습니다.");
-                        alertShownRef.current = true;
-                    }
+                    // Toast will be shown after state is set and context is ready
+                    setTimeout(() => {
+                        if (!alertShownRef.current) {
+                            setToast({ show: true, message: "데이터를 불러왔습니다 ✓", type: "success" });
+                            setTimeout(() => setToast({ show: false, message: "", type: "info" }), 3000);
+                            alertShownRef.current = true;
+                        }
+                    }, 100);
                 }
             }
         } catch (error) {
@@ -88,7 +92,17 @@ export const BudgetProvider = ({ children }) => {
         type: "variable",
     });
 
-    const value = {
+    // Toast state
+    const [toast, setToast] = useState({ show: false, message: "", type: "info" });
+
+    const showToast = (message, type = "info") => {
+        setToast({ show: true, message, type });
+        setTimeout(() => {
+            setToast({ show: false, message: "", type: "info" });
+        }, 3000);
+    };
+
+    const value = useMemo(() => ({
         dbData,
         setDbData,
         categories,
@@ -107,7 +121,10 @@ export const BudgetProvider = ({ children }) => {
         setEditingId,
         inputForm,
         setInputForm,
-    };
+        toast,
+        showToast,
+    }), [dbData, categories, currentYear, currentMonth, activeTab,
+        isCategoryModalOpen, isInputModalOpen, editingId, inputForm, toast]);
 
     return <BudgetContext.Provider value={value}>{children}</BudgetContext.Provider>;
 };
