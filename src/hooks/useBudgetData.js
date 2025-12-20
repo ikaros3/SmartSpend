@@ -157,29 +157,44 @@ export const useBudgetData = (fullMonths) => {
                     const rawData = XLSX.utils.sheet_to_json(ws, { header: 1 });
                     if (rawData.length < 2) continue;
 
-                    const yearMonthStr = rawData[0][0];
+                    // 첫 번째 행에서 "2025년 12월" 형식을 찾음
+                    const yearMonthStr = rawData[0][0]?.toString() || "";
                     const yearMatch = yearMonthStr.match(/(\d{4})년/);
                     const monthMatch = yearMonthStr.match(/(\d{1,2})월/);
                     if (!yearMatch || !monthMatch) continue;
 
                     const sheetYear = parseInt(yearMatch[1]);
-                    const sheetMonthStr = `${parseInt(monthMatch[1])}월`;
+                    const sheetMonth = parseInt(monthMatch[1]);
+                    // 앱에서 사용하는 표준 키 형식: "2025-12월"
+                    const sheetMonthStr = `${sheetYear}-${sheetMonth}월`;
                     if (!fileYear) fileYear = sheetYear;
 
                     for (let i = 2; i < rawData.length; i++) {
                         const row = rawData[i];
-                        if (!row[0] || !row[1] || isNaN(row[3])) continue;
+                        // 최소한 분류(0), 내용(1), 금액(3)은 있어야 함
+                        if (!row[0] || !row[1] || row[3] === undefined) continue;
 
                         const dateValue = row[4];
-                        let day = (dateValue instanceof Date) ? dateValue.getDate() : parseInt(dateValue);
+                        let day = null;
+
+                        if (dateValue instanceof Date) {
+                            day = dateValue.getDate();
+                        } else if (typeof dateValue === "string") {
+                            // "12/20" 또는 "2025-12-20" 등에서 마지막 숫자 추출
+                            const parts = dateValue.split(/[-/]/);
+                            day = parseInt(parts[parts.length - 1]);
+                        } else {
+                            day = parseInt(dateValue);
+                        }
 
                         const newItem = {
                             id: Date.now() + i,
-                            category: row[0],
-                            name: row[1],
-                            amount: parseInt(row[3]),
+                            category: row[0].toString(),
+                            name: row[1].toString(),
+                            amount: parseInt(row[3].toString().replace(/[^0-9]/g, "")) || 0,
                             type: row[2] === "고정비" ? "fixed" : "variable",
                             day: isNaN(day) ? null : day,
+                            fullDate: isNaN(day) || !day ? null : `${sheetYear}-${sheetMonth.toString().padStart(2, '0')}-${day.toString().padStart(2, '0')}`,
                             memo: row[5] || "",
                         };
 
@@ -187,7 +202,16 @@ export const useBudgetData = (fullMonths) => {
                         newDbData[sheetMonthStr].items.push(newItem);
                     }
                 }
-                setDbData(newDbData);
+
+                setDbData((prev) => {
+                    const updated = { ...prev };
+                    // 불러온 월의 데이터만 덮어쓰거나 병합 (여기서는 병합)
+                    Object.keys(newDbData).forEach(key => {
+                        updated[key] = newDbData[key];
+                    });
+                    return updated;
+                });
+
                 if (fileYear) setCurrentYear(fileYear);
                 alert("데이터를 성공적으로 불러왔습니다.");
             } catch (err) {
@@ -202,18 +226,26 @@ export const useBudgetData = (fullMonths) => {
     const handleDownloadExcel = () => {
         try {
             const wb = XLSX.utils.book_new();
-            Object.keys(dbData).forEach(month => {
+            // 모든 연도/월 데이터를 시트로 내보냄
+            const sortedKeys = Object.keys(dbData).sort();
+
+            sortedKeys.forEach(monthKey => {
+                const [year, month] = monthKey.split("-");
                 const wsData = [
-                    [`${currentYear}년 ${month}`],
+                    [`${year}년 ${month}`],
                     ["분류", "내용", "구분", "금액", "날짜", "메모"],
-                    ...dbData[month].items.sort((a, b) => a.day - b.day).map(item => [
-                        item.category, item.name, item.type === "fixed" ? "고정비" : "변동비",
-                        item.amount, item.day ? `${month.replace("월", "")}/${item.day}` : "", item.memo || ""
+                    ...dbData[monthKey].items.sort((a, b) => (a.day || 0) - (b.day || 0)).map(item => [
+                        item.category,
+                        item.name,
+                        item.type === "fixed" ? "고정비" : "변동비",
+                        item.amount,
+                        item.day ? `${month.replace("월", "")}/${item.day}` : "",
+                        item.memo || ""
                     ])
                 ];
                 XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(wsData), month);
             });
-            XLSX.writeFile(wb, "SmartSpend_지출내역.xlsx");
+            XLSX.writeFile(wb, "지출내역.xlsx");
         } catch (err) {
             console.error(err);
             alert("내보내기 중 오류가 발생했습니다.");
