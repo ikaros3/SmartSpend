@@ -1,0 +1,16 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // 사용자는 자신의 예산 데이터만 읽기/쓰기 가능
+    match /budgets/{userId} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+    }
+    
+    // 나중에 가족 공유 기능을 위한 확장 가능한 규칙
+    // match /budgets/{budgetId} {
+    //   allow read, write: if request.auth != null && 
+    //     (resource.data.ownerId == request.auth.uid ||
+    //      request.auth.uid in resource.data.sharedWith);
+    // }
+  }
+}
