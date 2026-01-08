@@ -6,7 +6,7 @@ import { useExcel } from "../../hooks/useExcel";
 import { useAuth } from "../../hooks/useAuth";
 
 const SettingsView = () => {
-    const { setIsCategoryModalOpen, syncStatus, manualSync, userId } = useBudgetContext();
+    const { setIsCategoryModalOpen, syncStatus, manualSync, userId, saveIfDirty } = useBudgetContext();
     const { handleSaveData, resetData } = useBudget();
     const { handleDownloadExcel, handleFileUpload } = useExcel();
     const { user, signOut } = useAuth();
@@ -29,6 +29,8 @@ const SettingsView = () => {
 
     const handleSignOut = async () => {
         if (window.confirm("로그아웃하시겠습니까?")) {
+            // 로그아웃 전 변경되지 않은 데이터 저장
+            await saveIfDirty();
             await signOut();
         }
     };

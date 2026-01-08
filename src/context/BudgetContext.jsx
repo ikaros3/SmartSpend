@@ -24,6 +24,7 @@ export const BudgetProvider = ({ children, userId }) => {
     const alertShownRef = useRef(false);
     const isInitialLoad = useRef(true);
     const saveTimeoutRef = useRef(null);
+    const isDirty = useRef(false); // 변경 사항 추적
 
     // Firestore에서 데이터 로드 및 실시간 구독
     useEffect(() => {
@@ -59,6 +60,7 @@ export const BudgetProvider = ({ children, userId }) => {
                         setDbData(remoteData.dbData || {});
                         setCategories(remoteData.categories || []);
                         setSyncStatus("synced");
+                        isDirty.current = false; // 원격에서 왔으므로 dirty 해제
 
                         // 동기화 알림 표시
                         if (!alertShownRef.current) {
@@ -69,7 +71,12 @@ export const BudgetProvider = ({ children, userId }) => {
                 });
 
                 setSyncStatus("synced");
-                isInitialLoad.current = false;
+
+                // 초기 로드 효과가 끝난 후 dirty 상태 관리 시작
+                setTimeout(() => {
+                    isInitialLoad.current = false;
+                    isDirty.current = false;
+                }, 100);
 
                 // 초기 로드 완료 알림
                 if (!alertShownRef.current) {
@@ -128,10 +135,11 @@ export const BudgetProvider = ({ children, userId }) => {
 
         if (hasLegacy) {
             setDbData(newDbData);
+            isDirty.current = true; // 마이그레이션 발생 시 저장 필요
         }
     }, [dbData]);
 
-    // Firestore 자동 저장 (디바운스 적용)
+    // Firestore 저장 (수동 동기화 및 앱 종료 시 사용)
     const saveToFirestore = useCallback(async (data) => {
         if (!userId) return;
 
@@ -139,6 +147,7 @@ export const BudgetProvider = ({ children, userId }) => {
             setSyncStatus("syncing");
             await saveBudgetData(userId, data);
             setSyncStatus("synced");
+            isDirty.current = false; // 저장 성공 시 dirty 해제
         } catch (error) {
             console.error("Firestore 저장 실패:", error);
             setSyncStatus("error");
@@ -155,6 +164,9 @@ export const BudgetProvider = ({ children, userId }) => {
 
         if (isInitialLoad.current) return;
 
+        // 데이터가 변경되었음을 표시
+        isDirty.current = true;
+
         // LocalStorage에만 백업 저장
         try {
             localStorage.setItem("budgetData", JSON.stringify({ dbData, categories }));
@@ -163,36 +175,58 @@ export const BudgetProvider = ({ children, userId }) => {
         }
     }, [dbData, categories]);
 
+    // 변경 사항이 있을 때만 저장하는 함수 (로그아웃 및 앱 종료 시 사용)
+    const saveIfDirty = useCallback(async () => {
+        const currentData = latestDataRef.current;
+
+        // 데이터가 있고 변경 사항이 있을 때만 저장
+        if ((Object.keys(currentData.dbData).length > 0 || currentData.categories.length > 0) && isDirty.current) {
+            console.log("변경 사항 감지: 저장 시작...");
+            try {
+                // 저장 중임을 알림 (UI 블로킹 등은 호출 측에서 처리 가능하지만, 여기선 Toast만)
+                // 비동기 처리를 기다려야 하므로 await 필수
+                await saveBudgetData(userId, currentData);
+                console.log("변경 사항 저장 완료");
+                isDirty.current = false;
+                return true;
+            } catch (err) {
+                console.error("변경 사항 저장 실패:", err);
+                return false;
+            }
+        }
+        return true; // 저장할 필요 없음
+    }, [userId]);
+
     // 앱 종료 및 백그라운드 전환 시 Firestore에 동기화
     useEffect(() => {
         if (!userId) return;
 
-        const handleSave = () => {
-            // 데이터가 비어있지 않은 경우에만 저장 (안전장치)
-            const currentData = latestDataRef.current;
-            if (Object.keys(currentData.dbData).length > 0 || currentData.categories.length > 0) {
-                // 비동기 함수지만 이벤트 핸들러 내부라 await 불가, fire-and-forget 방식 사용
-                saveBudgetData(userId, currentData).catch(err =>
-                    console.error("자동 저장 실패:", err)
-                );
-                // 일부 브라우저를 위한 fetch keepalive (옵션)
+        const handleBeforeUnload = (e) => {
+            // 변경 사항이 있으면 브라우저 종료 전 저장 시도
+            if (isDirty.current) {
+                // 비동기 호출을 보장하기 어려우므로 표준적인 방법은 아니지만 시도
+                saveIfDirty();
+
+                // 일부 브라우저에서 '변경사항이 저장되지 않을 수 있습니다' 경고 표시 가능
+                // e.preventDefault();
+                // e.returnValue = '';
             }
         };
 
         const handleVisibilityChange = () => {
             if (document.visibilityState === 'hidden') {
-                handleSave();
+                saveIfDirty();
             }
         };
 
-        window.addEventListener('beforeunload', handleSave);
+        window.addEventListener('beforeunload', handleBeforeUnload);
         document.addEventListener('visibilitychange', handleVisibilityChange);
 
         return () => {
-            window.removeEventListener('beforeunload', handleSave);
+            window.removeEventListener('beforeunload', handleBeforeUnload);
             document.removeEventListener('visibilitychange', handleVisibilityChange);
         };
-    }, [userId]);
+    }, [userId, saveIfDirty]);
 
     // 수동 동기화 함수
     const manualSync = useCallback(async () => {
@@ -256,10 +290,11 @@ export const BudgetProvider = ({ children, userId }) => {
         isLoading,
         syncStatus,
         manualSync,
+        saveIfDirty, // 노출
         userId,
     }), [dbData, categories, currentYear, currentMonth, activeTab,
         isCategoryModalOpen, isInputModalOpen, editingId, inputForm, toast,
-        isLoading, syncStatus, manualSync, userId]);
+        isLoading, syncStatus, manualSync, saveIfDirty, userId]);
 
     return <BudgetContext.Provider value={value}>{children}</BudgetContext.Provider>;
 };
