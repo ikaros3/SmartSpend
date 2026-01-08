@@ -124,3 +124,28 @@ export const migrateFromLocalStorage = async (userId) => {
         return false;
     }
 };
+
+/**
+ * 사용자 데이터 완전 삭제
+ * @param {string} userId - 사용자 UID
+ * @returns {Promise<void>}
+ */
+export const deleteUserData = async (userId) => {
+    if (!userId) {
+        console.error('deleteUserData: userId가 필요합니다');
+        return;
+    }
+
+    try {
+        // Firestore 문서를 빈 객체로 덮어쓰기 (완전 초기화)
+        await setDoc(getUserBudgetRef(userId), {
+            dbData: {},
+            categories: [],
+            updatedAt: serverTimestamp()
+        });
+        console.log('Firestore 데이터 완전 삭제 완료');
+    } catch (error) {
+        console.error('Firestore 삭제 실패:', error);
+        throw error;
+    }
+};

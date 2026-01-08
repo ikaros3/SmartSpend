@@ -1,6 +1,7 @@
 import { useMemo, useCallback } from "react";
 import { useBudgetContext } from "../context/BudgetContext";
 import { FULL_MONTHS } from "../constants";
+import { deleteUserData } from "../services/firestoreService";
 
 export const useBudget = () => {
     const {
@@ -14,6 +15,8 @@ export const useBudget = () => {
         setEditingId,
         setInputForm,
         setIsInputModalOpen,
+        userId,
+        manualSync,
     } = useBudgetContext();
 
     const monthKey = `${currentYear}-${currentMonth}`;
@@ -107,14 +110,28 @@ export const useBudget = () => {
         });
     }, [monthKey, setDbData]);
 
-    const resetData = useCallback(() => {
+    const resetData = useCallback(async () => {
         if (window.confirm("정말 모든 데이터를 초기화하시겠습니까?\n지출 내역과 카테고리가 모두 삭제되며, 복구할 수 없습니다.")) {
-            setDbData({});
-            setCategories([]);
-            localStorage.removeItem("budgetData");
-            alert("모든 데이터가 초기화되었습니다.");
+            try {
+                // 로컬 상태 초기화
+                setDbData({});
+                setCategories([]);
+
+                // LocalStorage 삭제
+                localStorage.removeItem("budgetData");
+
+                // Firestore에서 데이터 완전 삭제
+                if (userId) {
+                    await deleteUserData(userId);
+                }
+
+                alert("모든 데이터가 초기화되었습니다.");
+            } catch (error) {
+                console.error("데이터 초기화 오류:", error);
+                alert("데이터 초기화 중 오류가 발생했습니다.");
+            }
         }
-    }, [setDbData, setCategories]);
+    }, [setDbData, setCategories, userId]);
 
     const openCreateModal = useCallback(() => {
         setEditingId(null);

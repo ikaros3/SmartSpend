@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect, useRef, useMemo, useCallback } from "react";
-import { FULL_MONTHS } from "../constants";
+import { FULL_MONTHS, COLOR_PALETTE } from "../constants";
 import { saveBudgetData, loadBudgetData, subscribeToBudgetData, migrateFromLocalStorage } from "../services/firestoreService";
 
 const BudgetContext = createContext();
@@ -147,33 +147,52 @@ export const BudgetProvider = ({ children, userId }) => {
         }
     }, [userId]);
 
-    // 데이터 변경 시 자동 저장
+    // 데이터 변경 시 LocalStorage에만 백업 저장 (Firestore 자동 동기화 제거)
+    // Firestore 저장을 위한 최신 데이터 참조 유지
+    const latestDataRef = useRef({ dbData, categories });
     useEffect(() => {
-        if (isInitialLoad.current || !userId) return;
-        if (Object.keys(dbData).length === 0 && categories.length === 0) return;
+        latestDataRef.current = { dbData, categories };
 
-        // 디바운스: 500ms 후 저장
-        if (saveTimeoutRef.current) {
-            clearTimeout(saveTimeoutRef.current);
-        }
+        if (isInitialLoad.current) return;
 
-        saveTimeoutRef.current = setTimeout(() => {
-            saveToFirestore({ dbData, categories });
-        }, 500);
-
-        // LocalStorage에도 백업 저장
+        // LocalStorage에만 백업 저장
         try {
             localStorage.setItem("budgetData", JSON.stringify({ dbData, categories }));
         } catch (error) {
             console.error("LocalStorage 저장 실패:", error);
         }
+    }, [dbData, categories]);
 
-        return () => {
-            if (saveTimeoutRef.current) {
-                clearTimeout(saveTimeoutRef.current);
+    // 앱 종료 및 백그라운드 전환 시 Firestore에 동기화
+    useEffect(() => {
+        if (!userId) return;
+
+        const handleSave = () => {
+            // 데이터가 비어있지 않은 경우에만 저장 (안전장치)
+            const currentData = latestDataRef.current;
+            if (Object.keys(currentData.dbData).length > 0 || currentData.categories.length > 0) {
+                // 비동기 함수지만 이벤트 핸들러 내부라 await 불가, fire-and-forget 방식 사용
+                saveBudgetData(userId, currentData).catch(err =>
+                    console.error("자동 저장 실패:", err)
+                );
+                // 일부 브라우저를 위한 fetch keepalive (옵션)
             }
         };
-    }, [dbData, categories, userId, saveToFirestore]);
+
+        const handleVisibilityChange = () => {
+            if (document.visibilityState === 'hidden') {
+                handleSave();
+            }
+        };
+
+        window.addEventListener('beforeunload', handleSave);
+        document.addEventListener('visibilitychange', handleVisibilityChange);
+
+        return () => {
+            window.removeEventListener('beforeunload', handleSave);
+            document.removeEventListener('visibilitychange', handleVisibilityChange);
+        };
+    }, [userId]);
 
     // 수동 동기화 함수
     const manualSync = useCallback(async () => {
