@@ -198,7 +198,7 @@ const StatsView = () => {
                                             {cat.icon}
                                         </div>
                                         <span className="font-bold text-gray-700 truncate text-[15px]">
-                                            {cat.name}
+                                            {cat.name} <span className="font-medium text-gray-500">({Math.round(cat.percent * 100)}%)</span>
                                         </span>
                                     </div>
                                     <span className="font-bold text-gray-600 whitespace-nowrap text-[13px]">

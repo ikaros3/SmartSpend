@@ -1,5 +1,5 @@
-import React from "react";
-import { X, Save, Edit3, Trash2 } from "lucide-react";
+import React, { useState } from "react";
+import { X, Save, Edit3, Trash2, GripVertical } from "lucide-react";
 import { useBudgetContext } from "../../context/BudgetContext";
 import { useCategories } from "../../hooks/useCategories";
 
@@ -18,7 +18,56 @@ const CategoryManageModal = () => {
         handleAddCategory,
         handleUpdateCategory,
         handleDeleteCategory,
+        handleReorderCategories,
     } = useCategories();
+
+    // 드래그 앤 드롭 상태
+    const [draggedId, setDraggedId] = useState(null);
+    const [dragOverId, setDragOverId] = useState(null);
+
+    const handleDragStart = (e, catId) => {
+        setDraggedId(catId);
+        e.dataTransfer.effectAllowed = "move";
+        // 드래그 시 투명도 조정을 위한 타임아웃
+        setTimeout(() => {
+            e.target.style.opacity = "0.5";
+        }, 0);
+    };
+
+    const handleDragEnd = (e) => {
+        e.target.style.opacity = "1";
+        setDraggedId(null);
+        setDragOverId(null);
+    };
+
+    const handleDragOver = (e, catId) => {
+        e.preventDefault();
+        e.dataTransfer.dropEffect = "move";
+        if (catId !== draggedId) {
+            setDragOverId(catId);
+        }
+    };
+
+    const handleDragLeave = () => {
+        setDragOverId(null);
+    };
+
+    const handleDrop = (e, targetId) => {
+        e.preventDefault();
+        if (draggedId && draggedId !== targetId) {
+            const draggedIndex = categories.findIndex((c) => c.id === draggedId);
+            const targetIndex = categories.findIndex((c) => c.id === targetId);
+
+            if (draggedIndex !== -1 && targetIndex !== -1) {
+                const newCategories = [...categories];
+                const [removed] = newCategories.splice(draggedIndex, 1);
+                newCategories.splice(targetIndex, 0, removed);
+                handleReorderCategories(newCategories);
+            }
+        }
+        setDraggedId(null);
+        setDragOverId(null);
+    };
 
     if (!isCategoryModalOpen) return null;
 
@@ -57,12 +106,27 @@ const CategoryManageModal = () => {
 
                     {/* Category List */}
                     <div className="space-y-2">
-                        <h4 className="text-xs font-bold text-gray-500 mt-4">현재 카테고리</h4>
+                        <h4 className="text-xs font-bold text-gray-500 mt-4 flex items-center gap-2">
+                            현재 카테고리
+                            <span className="text-[10px] font-normal text-gray-400">
+                                (드래그하여 순서 변경)
+                            </span>
+                        </h4>
                         <div className="space-y-2">
                             {categories.map((cat) => (
                                 <div
                                     key={cat.id}
-                                    className="flex justify-between items-center bg-gray-50 p-3 rounded-lg"
+                                    draggable={editingCategory?.id !== cat.id}
+                                    onDragStart={(e) => handleDragStart(e, cat.id)}
+                                    onDragEnd={handleDragEnd}
+                                    onDragOver={(e) => handleDragOver(e, cat.id)}
+                                    onDragLeave={handleDragLeave}
+                                    onDrop={(e) => handleDrop(e, cat.id)}
+                                    className={`flex justify-between items-center bg-gray-50 p-3 rounded-lg transition-all duration-200
+                                        ${draggedId === cat.id ? "opacity-50 scale-95" : ""}
+                                        ${dragOverId === cat.id ? "ring-2 ring-blue-400 bg-blue-50" : ""}
+                                        ${editingCategory?.id !== cat.id ? "cursor-grab active:cursor-grabbing" : ""}
+                                    `}
                                 >
                                     {editingCategory?.id === cat.id ? (
                                         <>
@@ -97,7 +161,8 @@ const CategoryManageModal = () => {
                                         </>
                                     ) : (
                                         <>
-                                            <div className="flex items-center gap-3">
+                                            <div className="flex items-center gap-2">
+                                                <GripVertical size={16} className="text-gray-400 shrink-0" />
                                                 <div
                                                     className={`w-8 h-8 rounded flex items-center justify-center text-sm text-white shrink-0 ${cat.chartColor.replace(
                                                         "text",
@@ -108,16 +173,18 @@ const CategoryManageModal = () => {
                                                 </div>
                                                 <span className="text-sm font-medium text-gray-800">{cat.name}</span>
                                             </div>
-                                            <div className="flex gap-1">
+                                            <div className="flex gap-0.5">
                                                 <button
                                                     onClick={() => setEditingCategory(cat)}
                                                     className="p-1 text-gray-400 hover:text-blue-600 rounded-md hover:bg-blue-50 transition-colors"
+                                                    title="이름 수정"
                                                 >
                                                     <Edit3 size={16} />
                                                 </button>
                                                 <button
                                                     onClick={() => handleDeleteCategory(cat.id)}
                                                     className="p-1 text-gray-400 hover:text-red-600 rounded-md hover:bg-red-50 transition-colors"
+                                                    title="삭제"
                                                 >
                                                     <Trash2 size={16} />
                                                 </button>
