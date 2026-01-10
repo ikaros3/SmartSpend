@@ -167,7 +167,7 @@ const LedgerView = () => {
                         </div>
 
                         {/* 합계 표시 */}
-                        <div className="sticky bottom-0 bg-gradient-to-t from-blue-50 to-white border-t-2 border-blue-200 shadow-lg">
+                        <div className="bg-gradient-to-t from-blue-50 to-white border-t-2 border-blue-200 mt-2">
                             <div className="grid grid-cols-[2fr_1fr_0.8fr_1fr_0.7fr] gap-4 px-4 py-4">
                                 <div className="flex items-center">
                                     <span className="text-sm font-bold text-gray-700">
