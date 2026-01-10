@@ -165,6 +165,25 @@ const LedgerView = () => {
                                 );
                             })}
                         </div>
+
+                        {/* 합계 표시 */}
+                        <div className="bg-gradient-to-t from-blue-50 to-white border-t-2 border-blue-200 mt-2">
+                            <div className="grid grid-cols-[2fr_1fr_0.8fr_1fr_0.7fr] gap-4 px-4 py-4">
+                                <div className="flex items-center">
+                                    <span className="text-sm font-bold text-gray-700">
+                                        합계 ({filteredItems.length}건)
+                                    </span>
+                                </div>
+                                <div className="text-right flex items-center justify-end">
+                                    <span className="text-base font-bold text-blue-600">
+                                        - {formatCurrency(filteredItems.reduce((sum, item) => sum + item.amount, 0))}
+                                    </span>
+                                </div>
+                                <div></div>
+                                <div></div>
+                                <div></div>
+                            </div>
+                        </div>
                     </div>
                 )}
             </div>

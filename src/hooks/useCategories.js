@@ -43,6 +43,11 @@ export const useCategories = () => {
         }
     }, [categories, setCategories]);
 
+    // 카테고리 순서 재정렬 함수 (드래그 앤 드롭용)
+    const handleReorderCategories = useCallback((newCategories) => {
+        setCategories(newCategories);
+    }, [setCategories]);
+
     return {
         newCategoryName,
         setNewCategoryName,
@@ -51,5 +56,6 @@ export const useCategories = () => {
         handleAddCategory,
         handleUpdateCategory,
         handleDeleteCategory,
+        handleReorderCategories,
     };
 };
