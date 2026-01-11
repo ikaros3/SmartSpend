@@ -141,7 +141,7 @@ const StatsView = () => {
     };
 
     return (
-        <div className="flex-1 overflow-y-auto pb-24 p-5 flex flex-col space-y-5 animate-in fade-in duration-300">
+        <div className="flex-1 overflow-y-auto pb-20 p-5 flex flex-col space-y-5 animate-in fade-in duration-300">
             {/* Monthly Trend Bar Chart */}
             <div className="bg-white p-5 rounded-2xl shadow-sm border border-gray-100 flex flex-col">
                 <div className="flex items-center justify-between mb-2">
@@ -185,15 +185,15 @@ const StatsView = () => {
                             <div
                                 key={val}
                                 className={`absolute w-full border-b ${selectedCategory === "all" && val === 10000000
-                                        ? "border-red-300 border-solid"
-                                        : "border-dashed border-gray-200"
+                                    ? "border-red-300 border-solid"
+                                    : "border-dashed border-gray-200"
                                     }`}
                                 style={{ bottom: `${getPct(val)}%` }}
                             >
                                 <span
                                     className={`absolute -top-3 left-0 text-[10px] bg-white pr-1 ${selectedCategory === "all" && val === 10000000
-                                            ? "font-bold text-red-400"
-                                            : "text-gray-400"
+                                        ? "font-bold text-red-400"
+                                        : "text-gray-400"
                                         }`}
                                 >
                                     {formatAmount(val)}
@@ -232,8 +232,8 @@ const StatsView = () => {
                                     <div className="w-full flex-1 flex items-end justify-center relative">
                                         <div
                                             className={`w-full max-w-[32px] rounded-t-sm transition-all duration-500 relative ${isActive
-                                                    ? `${barColorActive} shadow-md`
-                                                    : barColorInactive
+                                                ? `${barColorActive} shadow-md`
+                                                : barColorInactive
                                                 }`}
                                             style={{ height: `${Math.max(heightPct, 4)}%` }}
                                         >

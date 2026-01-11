@@ -36,7 +36,7 @@ const SettingsView = () => {
     };
 
     return (
-        <div className="flex-1 overflow-y-auto pb-24 p-5 animate-in fade-in duration-300">
+        <div className="flex-1 overflow-y-auto pb-20 p-5 animate-in fade-in duration-300">
             {/* 사용자 정보 섹션 */}
             <div className="flex items-center gap-4 mb-8">
                 <div className="w-16 h-16 bg-gray-200 rounded-full flex items-center justify-center overflow-hidden">

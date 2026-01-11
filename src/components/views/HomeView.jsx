@@ -10,9 +10,9 @@ const HomeView = () => {
     const { currentData, prevMonthTotal, diffAmount, upcomingFixedExpenses, monthlyData } = useBudget();
 
     return (
-        <div className="flex-1 overflow-y-auto pb-24 p-5 flex flex-col space-y-5 animate-in fade-in duration-300">
+        <div className="flex-1 overflow-y-auto pb-20 p-5 flex flex-col space-y-5 animate-in fade-in duration-300">
             {/* Total Card */}
-            <div className="bg-white rounded-3xl p-6 shadow-sm border border-gray-100 text-center relative overflow-hidden flex flex-col justify-center min-h-[200px]">
+            <div className="bg-white rounded-3xl p-4 shadow-sm border border-gray-100 text-center relative overflow-hidden flex flex-col justify-center min-h-[160px]">
                 <div className="absolute -top-6 -right-6 w-24 h-24 bg-blue-100 rounded-full opacity-50 blur-xl"></div>
                 <p className="text-gray-500 text-sm mb-1 font-medium">
                     {currentYear}년 {currentMonth} 지출
@@ -20,12 +20,12 @@ const HomeView = () => {
                 <h2 className="text-4xl font-extrabold text-gray-800 tracking-tight">
                     {formatCurrency(currentData.total)}
                 </h2>
-                <div className="mt-6 flex flex-col items-center justify-center space-y-2">
+                <div className="mt-4 flex flex-col items-center justify-center space-y-2">
                     {prevMonthTotal > 0 && (
                         <div
                             className={`flex items-center text-xs font-bold px-3 py-1 rounded-full border ${diffAmount > 0
-                                    ? "bg-red-50 text-red-600 border-red-100"
-                                    : "bg-green-50 text-green-600 border-green-100"
+                                ? "bg-red-50 text-red-600 border-red-100"
+                                : "bg-green-50 text-green-600 border-green-100"
                                 }`}
                         >
                             {diffAmount > 0 ? (

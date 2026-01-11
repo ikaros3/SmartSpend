@@ -62,7 +62,7 @@ const LedgerView = () => {
             </div>
 
             {/* Table Area */}
-            <div className="flex-1 overflow-y-auto pb-24">
+            <div className="flex-1 overflow-y-auto pb-20">
                 {filteredItems.length === 0 ? (
                     <div className="flex flex-col items-center justify-center py-20 text-gray-400">
                         <List size={48} className="mb-4 opacity-20" />
@@ -71,7 +71,7 @@ const LedgerView = () => {
                 ) : (
                     <div className="bg-white">
                         <div className="sticky top-0 bg-white border-b border-gray-200 z-10">
-                            <div className="grid grid-cols-[2fr_1fr_0.8fr_1fr_0.7fr] gap-4 px-4 py-3 text-xs font-bold text-gray-700">
+                            <div className="grid grid-cols-[1.5fr_1.3fr_0.7fr_0.8fr_0.6fr] gap-3 px-4 py-3 text-xs font-bold text-gray-700">
                                 <div>항목</div>
                                 <div className="text-right">금액</div>
                                 <div className="text-center">날짜</div>
@@ -90,7 +90,7 @@ const LedgerView = () => {
                                 return (
                                     <div
                                         key={item.id || idx}
-                                        className="grid grid-cols-[2fr_1fr_0.8fr_1fr_0.7fr] gap-4 px-4 py-3 hover:bg-gray-50 transition-colors"
+                                        className="grid grid-cols-[1.5fr_1.3fr_0.7fr_0.8fr_0.6fr] gap-3 px-4 py-3 hover:bg-gray-50 transition-colors"
                                     >
                                         <div className="flex items-center gap-2 min-w-0">
                                             <div
@@ -122,7 +122,7 @@ const LedgerView = () => {
                                         </div>
 
                                         <div className="text-right flex items-center justify-end">
-                                            <span className="text-sm font-bold text-gray-900">
+                                            <span className="text-sm font-bold text-gray-900 whitespace-nowrap">
                                                 - {formatCurrency(item.amount)}
                                             </span>
                                         </div>
@@ -168,14 +168,14 @@ const LedgerView = () => {
 
                         {/* 합계 표시 */}
                         <div className="bg-gradient-to-t from-blue-50 to-white border-t-2 border-blue-200 mt-2">
-                            <div className="grid grid-cols-[2fr_1fr_0.8fr_1fr_0.7fr] gap-4 px-4 py-4">
+                            <div className="grid grid-cols-[1.5fr_1.3fr_0.7fr_0.8fr_0.6fr] gap-3 px-4 py-4">
                                 <div className="flex items-center">
                                     <span className="text-sm font-bold text-gray-700">
                                         합계 ({filteredItems.length}건)
                                     </span>
                                 </div>
                                 <div className="text-right flex items-center justify-end">
-                                    <span className="text-base font-bold text-blue-600">
+                                    <span className="text-base font-bold text-blue-600 whitespace-nowrap">
                                         - {formatCurrency(filteredItems.reduce((sum, item) => sum + item.amount, 0))}
                                     </span>
                                 </div>

@@ -134,7 +134,7 @@ export default function CalendarView({
                                 );
                             })}
                             <div className="mt-2 pt-2 border-t border-gray-200 text-right">
-                                <p className="text-xs text-gray-600">
+                                <p className="text-base text-gray-600">
                                     합계: <span className="font-bold text-blue-600">
                                         {formatCurrency(selectedDayItems.reduce((sum, item) => sum + item.amount, 0))}
                                     </span>

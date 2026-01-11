@@ -73,3 +73,78 @@ Java HotSpot(TM) 64-Bit Server VM (build 25.0.1+8-LTS-27, mixed mode, sharing)
 
 Issues? Report them at https://github.com/firebase/firebase-tools/issues and attach the *-debug.log files.
  
+[debug] [2026-01-11T16:04:01.200Z] ----------------------------------------------------------------------
+[debug] [2026-01-11T16:04:01.202Z] Command:       C:\Program Files\nodejs\node.exe C:\Users\ikaros\AppData\Roaming\npm\node_modules\firebase-tools\lib\bin\firebase.js emulators:start
+[debug] [2026-01-11T16:04:01.202Z] CLI Version:   15.2.1
+[debug] [2026-01-11T16:04:01.202Z] Platform:      win32
+[debug] [2026-01-11T16:04:01.203Z] Node Version:  v24.11.1
+[debug] [2026-01-11T16:04:01.203Z] Time:          Mon Jan 12 2026 01:04:01 GMT+0900 (대한민국 표준시)
+[debug] [2026-01-11T16:04:01.203Z] ----------------------------------------------------------------------
+[debug] 
+[debug] [2026-01-11T16:04:01.204Z] >>> [apiv2][query] GET https://firebase-public.firebaseio.com/cli.json [none]
+[debug] [2026-01-11T16:04:02.721Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform"]
+[debug] [2026-01-11T16:04:02.722Z] > authorizing via signed-in user (ikaros3@gmail.com)
+[debug] [2026-01-11T16:04:02.900Z] java version "25.0.1" 2025-10-21 LTS
+Java(TM) SE Runtime Environment (build 25.0.1+8-LTS-27)
+Java HotSpot(TM) 64-Bit Server VM (build 25.0.1+8-LTS-27, mixed mode, sharing)
+
+[debug] [2026-01-11T16:04:02.919Z] Parsed Java major version: 25
+[info] i  emulators: Starting emulators: auth, firestore, hosting {"metadata":{"emulator":{"name":"hub"},"message":"Starting emulators: auth, firestore, hosting"}}
+[debug] [2026-01-11T16:04:02.931Z] [logging] Logging Emulator only supports listening on one address (127.0.0.1). Not listening on ::1
+[debug] [2026-01-11T16:04:02.931Z] [auth] Authentication Emulator only supports listening on one address (127.0.0.1). Not listening on ::1
+[debug] [2026-01-11T16:04:02.931Z] [firestore] Firestore Emulator only supports listening on one address (127.0.0.1). Not listening on ::1
+[debug] [2026-01-11T16:04:02.931Z] [firestore.websocket] websocket server for firestore only supports listening on one address (127.0.0.1). Not listening on ::1
+[debug] [2026-01-11T16:04:02.931Z] [hosting] Hosting Emulator only supports listening on one address (127.0.0.1). Not listening on ::1
+[debug] [2026-01-11T16:04:02.931Z] assigned listening specs for emulators {"user":{"hub":[{"address":"127.0.0.1","family":"IPv4","port":4400},{"address":"::1","family":"IPv6","port":4400}],"ui":[{"address":"127.0.0.1","family":"IPv4","port":4000},{"address":"::1","family":"IPv6","port":4000}],"logging":[{"address":"127.0.0.1","family":"IPv4","port":4500}],"auth":[{"address":"127.0.0.1","family":"IPv4","port":9099}],"firestore":[{"address":"127.0.0.1","family":"IPv4","port":8080}],"firestore.websocket":[{"address":"127.0.0.1","family":"IPv4","port":9150}],"hosting":[{"address":"127.0.0.1","family":"IPv4","port":5000}]},"metadata":{"message":"assigned listening specs for emulators"}}
+[debug] [2026-01-11T16:04:02.935Z] Found emulator hub locator: {"version":"15.2.1","origins":["http://127.0.0.1:4400","http://[::1]:4400"],"pid":1976}
+[debug] [2026-01-11T16:04:02.935Z] Write emulator hub locator at C:\Users\ikaros\AppData\Local\Temp\hub-smartspend-june0311.json
+[debug] [2026-01-11T16:04:02.943Z] Ignoring unsupported arg: auto_download {"metadata":{"emulator":{"name":"firestore"},"message":"Ignoring unsupported arg: auto_download"}}
+[debug] [2026-01-11T16:04:02.943Z] Ignoring unsupported arg: single_project_mode_error {"metadata":{"emulator":{"name":"firestore"},"message":"Ignoring unsupported arg: single_project_mode_error"}}
+[debug] [2026-01-11T16:04:02.943Z] Starting Firestore Emulator with command {"binary":"java","args":["-Dgoogle.cloud_firestore.debug_log_level=FINE","-Duser.language=en","-jar","C:\\Users\\ikaros\\.cache\\firebase\\emulators\\cloud-firestore-emulator-v1.20.2.jar","--host","127.0.0.1","--port",8080,"--websocket_port",9150,"--project_id","smartspend-june0311","--rules","D:\\Project\\Github\\SmartSpend\\firestore.rules","--single_project_mode",true],"optionalArgs":["port","webchannel_port","host","rules","websocket_port","functions_emulator","seed_from_export","project_id","single_project_mode"],"joinArgs":false,"shell":false,"port":8080} {"metadata":{"emulator":{"name":"firestore"},"message":"Starting Firestore Emulator with command {\"binary\":\"java\",\"args\":[\"-Dgoogle.cloud_firestore.debug_log_level=FINE\",\"-Duser.language=en\",\"-jar\",\"C:\\\\Users\\\\ikaros\\\\.cache\\\\firebase\\\\emulators\\\\cloud-firestore-emulator-v1.20.2.jar\",\"--host\",\"127.0.0.1\",\"--port\",8080,\"--websocket_port\",9150,\"--project_id\",\"smartspend-june0311\",\"--rules\",\"D:\\\\Project\\\\Github\\\\SmartSpend\\\\firestore.rules\",\"--single_project_mode\",true],\"optionalArgs\":[\"port\",\"webchannel_port\",\"host\",\"rules\",\"websocket_port\",\"functions_emulator\",\"seed_from_export\",\"project_id\",\"single_project_mode\"],\"joinArgs\":false,\"shell\":false,\"port\":8080}"}}
+[info] i  firestore: Firestore Emulator logging to firestore-debug.log {"metadata":{"emulator":{"name":"firestore"},"message":"Firestore Emulator logging to \u001b[1mfirestore-debug.log\u001b[22m"}}
+[debug] [2026-01-11T16:04:03.063Z] <<< [apiv2][status] GET https://firebase-public.firebaseio.com/cli.json 200
+[debug] [2026-01-11T16:04:03.063Z] <<< [apiv2][body] GET https://firebase-public.firebaseio.com/cli.json {"cloudBuildErrorAfter":1594252800000,"cloudBuildWarnAfter":1590019200000,"defaultNode10After":1594252800000,"minVersion":"3.0.5","node8DeploysDisabledAfter":1613390400000,"node8RuntimeDisabledAfter":1615809600000,"node8WarnAfter":1600128000000}
+[info] +  firestore: Firestore Emulator UI websocket is running on 9150. {"metadata":{"emulator":{"name":"firestore"},"message":"Firestore Emulator UI websocket is running on 9150."}}
+[debug] [2026-01-11T16:04:11.308Z] Checked if tokens are valid: false, expires at: 1768062042216
+[debug] [2026-01-11T16:04:11.308Z] Checked if tokens are valid: false, expires at: 1768062042216
+[debug] [2026-01-11T16:04:11.309Z] > refreshing access token with scopes: []
+[debug] [2026-01-11T16:04:11.309Z] >>> [apiv2][query] POST https://www.googleapis.com/oauth2/v3/token [none]
+[debug] [2026-01-11T16:04:11.309Z] >>> [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
+[debug] [2026-01-11T16:04:11.542Z] <<< [apiv2][status] POST https://www.googleapis.com/oauth2/v3/token 200
+[debug] [2026-01-11T16:04:11.542Z] <<< [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
+[debug] [2026-01-11T16:04:11.549Z] >>> [apiv2][query] GET https://firebasehosting.googleapis.com/v1beta1/projects/smartspend-june0311/sites 
+[debug] [2026-01-11T16:04:13.029Z] <<< [apiv2][status] GET https://firebasehosting.googleapis.com/v1beta1/projects/smartspend-june0311/sites 200
+[debug] [2026-01-11T16:04:13.029Z] <<< [apiv2][body] GET https://firebasehosting.googleapis.com/v1beta1/projects/smartspend-june0311/sites {"sites":[{"name":"projects/smartspend-june0311/sites/smartspend-june","defaultUrl":"https://smartspend-june.web.app","appId":"1:173532794836:web:9a4a9dcedb22b5ada31041","type":"USER_SITE"},{"name":"projects/smartspend-june0311/sites/smartspend-june0311","defaultUrl":"https://smartspend-june0311.web.app","type":"DEFAULT_SITE"}]}
+[debug] [2026-01-11T16:04:13.029Z] Checked if tokens are valid: true, expires at: 1768151050542
+[debug] [2026-01-11T16:04:13.029Z] Checked if tokens are valid: true, expires at: 1768151050542
+[debug] [2026-01-11T16:04:13.029Z] >>> [apiv2][query] GET https://firebase.googleapis.com/v1beta1/projects/smartspend-june0311/webApps/-/config [none]
+[debug] [2026-01-11T16:04:13.852Z] <<< [apiv2][status] GET https://firebase.googleapis.com/v1beta1/projects/smartspend-june0311/webApps/-/config 200
+[debug] [2026-01-11T16:04:13.852Z] <<< [apiv2][body] GET https://firebase.googleapis.com/v1beta1/projects/smartspend-june0311/webApps/-/config {"projectId":"smartspend-june0311","appId":"1:173532794836:web:9a4a9dcedb22b5ada31041","storageBucket":"smartspend-june0311.firebasestorage.app","apiKey":"AIzaSyCNakdhJevTPVbynomVQuv5nSsXmPewUAs","authDomain":"smartspend-june0311.firebaseapp.com","messagingSenderId":"173532794836","measurementId":"G-MK724M9C36","projectNumber":"173532794836","version":"2"}
+[debug] [2026-01-11T16:04:13.857Z] Checked if tokens are valid: true, expires at: 1768151050542
+[debug] [2026-01-11T16:04:13.857Z] Checked if tokens are valid: true, expires at: 1768151050542
+[debug] [2026-01-11T16:04:13.857Z] >>> [apiv2][query] GET https://firebase.googleapis.com/v1beta1/projects/smartspend-june0311 [none]
+[debug] [2026-01-11T16:04:14.163Z] <<< [apiv2][status] GET https://firebase.googleapis.com/v1beta1/projects/smartspend-june0311 200
+[debug] [2026-01-11T16:04:14.163Z] <<< [apiv2][body] GET https://firebase.googleapis.com/v1beta1/projects/smartspend-june0311 {"projectId":"smartspend-june0311","projectNumber":"173532794836","displayName":"SmartSpend","name":"projects/smartspend-june0311","resources":{"hostingSite":"smartspend-june0311"},"state":"ACTIVE","etag":"1_0f95d23e-dd32-4c71-ab96-6d509aad33de"}
+[info] i  hosting[smartspend-june0311]: Serving hosting files from: dist {"metadata":{"emulator":{"name":"hosting"},"message":"Serving hosting files from: \u001b[1mdist\u001b[22m"}}
+[info] +  hosting[smartspend-june0311]: Local server: http://127.0.0.1:5000 {"metadata":{"emulator":{"name":"hosting"},"message":"Local server: \u001b[4m\u001b[1mhttp://127.0.0.1:5000\u001b[22m\u001b[24m"}}
+[debug] [2026-01-11T16:04:14.183Z] Could not find VSCode notification endpoint: FetchError: request to http://localhost:40001/vscode/notify failed, reason: . If you are not running the Firebase Data Connect VSCode extension, this is expected and not an issue.
+[info] 
+┌─────────────────────────────────────────────────────────────┐
+│ ✔  All emulators ready! It is now safe to connect your app. │
+│ i  View Emulator UI at http://127.0.0.1:4000/               │
+└─────────────────────────────────────────────────────────────┘
+
+┌────────────────┬────────────────┬─────────────────────────────────┐
+│ Emulator       │ Host:Port      │ View in Emulator UI             │
+├────────────────┼────────────────┼─────────────────────────────────┤
+│ Authentication │ 127.0.0.1:9099 │ http://127.0.0.1:4000/auth      │
+├────────────────┼────────────────┼─────────────────────────────────┤
+│ Firestore      │ 127.0.0.1:8080 │ http://127.0.0.1:4000/firestore │
+├────────────────┼────────────────┼─────────────────────────────────┤
+│ Hosting        │ 127.0.0.1:5000 │ n/a                             │
+└────────────────┴────────────────┴─────────────────────────────────┘
+  Emulator Hub host: 127.0.0.1 port: 4400
+  Other reserved ports: 4500, 9150
+
+Issues? Report them at https://github.com/firebase/firebase-tools/issues and attach the *-debug.log files.
+ 
