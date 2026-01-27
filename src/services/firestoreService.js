@@ -149,3 +149,51 @@ export const deleteUserData = async (userId) => {
         throw error;
     }
 };
+
+/**
+ * 고정비 템플릿 저장
+ * @param {string} userId - 사용자 UID
+ * @param {Array} templates - 고정비 템플릿 배열
+ * @returns {Promise<void>}
+ */
+export const saveFixedExpenseTemplates = async (userId, templates) => {
+    if (!userId) {
+        console.error('saveFixedExpenseTemplates: userId가 필요합니다');
+        return;
+    }
+
+    try {
+        await setDoc(getUserBudgetRef(userId), {
+            fixedExpenseTemplates: templates,
+            updatedAt: serverTimestamp()
+        }, { merge: true });
+        console.log('고정비 템플릿 저장 완료');
+    } catch (error) {
+        console.error('고정비 템플릿 저장 실패:', error);
+        throw error;
+    }
+};
+
+/**
+ * 고정비 템플릿 로드
+ * @param {string} userId - 사용자 UID
+ * @returns {Promise<Array>}
+ */
+export const loadFixedExpenseTemplates = async (userId) => {
+    if (!userId) {
+        console.error('loadFixedExpenseTemplates: userId가 필요합니다');
+        return [];
+    }
+
+    try {
+        const snapshot = await getDoc(getUserBudgetRef(userId));
+        if (snapshot.exists()) {
+            const data = snapshot.data();
+            return data.fixedExpenseTemplates || [];
+        }
+        return [];
+    } catch (error) {
+        console.error('고정비 템플릿 로드 실패:', error);
+        throw error;
+    }
+};

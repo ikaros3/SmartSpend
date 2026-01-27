@@ -4,3 +4,6 @@ dist
 .env.*.local
 .firebase
 .firebase/hosting.ZGlzdA.cache
+
+*storybook.log
+storybook-static

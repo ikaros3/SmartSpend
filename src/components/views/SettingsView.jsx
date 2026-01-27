@@ -6,7 +6,7 @@ import { useExcel } from "../../hooks/useExcel";
 import { useAuth } from "../../hooks/useAuth";
 
 const SettingsView = () => {
-    const { setIsCategoryModalOpen, syncStatus, manualSync, userId, saveIfDirty } = useBudgetContext();
+    const { setIsCategoryModalOpen, setIsFixedExpenseModalOpen, syncStatus, manualSync, userId, saveIfDirty } = useBudgetContext();
     const { handleSaveData, resetData } = useBudget();
     const { handleDownloadExcel, handleFileUpload } = useExcel();
     const { user, signOut } = useAuth();
@@ -103,10 +103,13 @@ const SettingsView = () => {
                             </div>
                             <ChevronRight size={16} className="text-gray-400" />
                         </div>
-                        <div className="p-4 flex justify-between items-center hover:bg-gray-50 cursor-pointer">
+                        <div
+                            onClick={() => setIsFixedExpenseModalOpen(true)}
+                            className="p-4 flex justify-between items-center hover:bg-gray-50 cursor-pointer"
+                        >
                             <div className="flex items-center gap-3">
                                 <Settings size={18} className="text-green-500" />
-                                <span className="text-sm font-medium">고정비/변동비 기준 설정</span>
+                                <span className="text-sm font-medium">고정비 설정</span>
                             </div>
                             <ChevronRight size={16} className="text-gray-400" />
                         </div>

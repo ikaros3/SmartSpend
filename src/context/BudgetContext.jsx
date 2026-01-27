@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState, useEffect, useRef, useMemo, useCallback } from "react";
 import { FULL_MONTHS, COLOR_PALETTE } from "../constants";
-import { saveBudgetData, loadBudgetData, subscribeToBudgetData, migrateFromLocalStorage } from "../services/firestoreService";
+import { saveBudgetData, loadBudgetData, subscribeToBudgetData, migrateFromLocalStorage, saveFixedExpenseTemplates, loadFixedExpenseTemplates } from "../services/firestoreService";
+import { DEFAULT_FIXED_EXPENSE_TEMPLATES, isNewMonth, createExpenseFromTemplate, isFixedExpenseAlreadyCreated, getCurrentMonthDateString } from "../utils/fixedExpenseHelper";
 
 const BudgetContext = createContext();
 
@@ -15,6 +16,7 @@ export const useBudgetContext = () => {
 export const BudgetProvider = ({ children, userId }) => {
     const [dbData, setDbData] = useState({});
     const [categories, setCategories] = useState([]);
+    const [fixedExpenseTemplates, setFixedExpenseTemplates] = useState([]);
     const [currentYear, setCurrentYear] = useState(new Date().getFullYear());
     const [currentMonth, setCurrentMonth] = useState(FULL_MONTHS[0]);
     const [activeTab, setActiveTab] = useState("home");
@@ -48,7 +50,11 @@ export const BudgetProvider = ({ children, userId }) => {
                 if (data) {
                     setDbData(data.dbData || {});
                     setCategories(data.categories || []);
+                    setFixedExpenseTemplates(data.fixedExpenseTemplates || []);
                 }
+
+                // 고정비 자동 생성 체크
+                await checkAndGenerateMonthlyExpenses(userId);
 
                 // 실시간 구독 설정
                 unsubscribe = subscribeToBudgetData(userId, (remoteData) => {
@@ -244,6 +250,7 @@ export const BudgetProvider = ({ children, userId }) => {
     }, [userId, dbData, categories, saveToFirestore]);
 
     const [isCategoryModalOpen, setIsCategoryModalOpen] = useState(false);
+    const [isFixedExpenseModalOpen, setIsFixedExpenseModalOpen] = useState(false);
     const [isInputModalOpen, setIsInputModalOpen] = useState(false);
     const [editingId, setEditingId] = useState(null);
     const [inputForm, setInputForm] = useState({
@@ -265,11 +272,139 @@ export const BudgetProvider = ({ children, userId }) => {
         }, 3000);
     };
 
+    // 고정비 자동 생성 체크 함수
+    const checkAndGenerateMonthlyExpenses = useCallback(async (uid) => {
+        try {
+            const lastCheck = localStorage.getItem('lastFixedExpenseCheck');
+
+            if (isNewMonth(lastCheck)) {
+                console.log('새로운 달 감지: 고정비 자동 생성 시작');
+
+                // 고정비 템플릿 로드
+                const templates = await loadFixedExpenseTemplates(uid);
+                const activeTemplates = templates.filter(t => t.isActive);
+
+                if (activeTemplates.length === 0) {
+                    console.log('활성화된 고정비 템플릿 없음');
+                    localStorage.setItem('lastFixedExpenseCheck', new Date().toISOString());
+                    return;
+                }
+
+                // 현재 dbData 로드
+                const currentData = await loadBudgetData(uid);
+                const currentDbData = currentData?.dbData || {};
+                const newDbData = { ...currentDbData };
+                let generatedCount = 0;
+
+                // 각 템플릿에 대해 지출 항목 생성
+                for (const template of activeTemplates) {
+                    const dateKey = getCurrentMonthDateString(template.dayOfMonth);
+
+                    // 중복 체크
+                    if (!isFixedExpenseAlreadyCreated(newDbData, template.description, dateKey)) {
+                        const expense = createExpenseFromTemplate(template);
+
+                        if (!newDbData[dateKey]) {
+                            newDbData[dateKey] = [];
+                        }
+
+                        newDbData[dateKey].push(expense);
+                        generatedCount++;
+                        console.log(`고정비 생성: ${template.description} - ${dateKey}`);
+                    }
+                }
+
+                // 생성된 항목이 있으면 저장
+                if (generatedCount > 0) {
+                    await saveBudgetData(uid, { ...currentData, dbData: newDbData });
+                    setDbData(newDbData);
+                    showToast(`${generatedCount}개의 고정비가 자동 생성되었습니다 ✓`, 'success');
+                }
+
+                // 마지막 체크 날짜 업데이트
+                localStorage.setItem('lastFixedExpenseCheck', new Date().toISOString());
+            }
+        } catch (error) {
+            console.error('고정비 자동 생성 실패:', error);
+        }
+    }, []);
+
+    // 고정비 템플릿 저장
+    const handleSaveFixedExpenseTemplate = useCallback(async (template) => {
+        try {
+            const existingIndex = fixedExpenseTemplates.findIndex(t => t.id === template.id);
+            let updatedTemplates;
+
+            if (existingIndex >= 0) {
+                // 수정
+                updatedTemplates = [...fixedExpenseTemplates];
+                updatedTemplates[existingIndex] = template;
+            } else {
+                // 추가
+                updatedTemplates = [...fixedExpenseTemplates, template];
+            }
+
+            await saveFixedExpenseTemplates(userId, updatedTemplates);
+            setFixedExpenseTemplates(updatedTemplates);
+            showToast('고정비 템플릿이 저장되었습니다 ✓', 'success');
+        } catch (error) {
+            console.error('고정비 템플릿 저장 실패:', error);
+            showToast('저장 실패', 'error');
+        }
+    }, [userId, fixedExpenseTemplates]);
+
+    // 고정비 템플릿 삭제
+    const handleDeleteFixedExpenseTemplate = useCallback(async (templateId) => {
+        try {
+            const updatedTemplates = fixedExpenseTemplates.filter(t => t.id !== templateId);
+            await saveFixedExpenseTemplates(userId, updatedTemplates);
+            setFixedExpenseTemplates(updatedTemplates);
+            showToast('고정비 템플릿이 삭제되었습니다', 'info');
+        } catch (error) {
+            console.error('고정비 템플릿 삭제 실패:', error);
+            showToast('삭제 실패', 'error');
+        }
+    }, [userId, fixedExpenseTemplates]);
+
+    // 고정비 템플릿 활성화/비활성화 토글
+    const handleToggleFixedExpenseActive = useCallback(async (templateId) => {
+        try {
+            const updatedTemplates = fixedExpenseTemplates.map(t =>
+                t.id === templateId ? { ...t, isActive: !t.isActive } : t
+            );
+            await saveFixedExpenseTemplates(userId, updatedTemplates);
+            setFixedExpenseTemplates(updatedTemplates);
+        } catch (error) {
+            console.error('고정비 템플릿 토글 실패:', error);
+            showToast('변경 실패', 'error');
+        }
+    }, [userId, fixedExpenseTemplates]);
+
+    // 기본 고정비 템플릿으로 초기화
+    const handleInitializeDefaultTemplates = useCallback(async () => {
+        try {
+            const templatesWithTimestamp = DEFAULT_FIXED_EXPENSE_TEMPLATES.map(t => ({
+                ...t,
+                createdAt: new Date().toISOString(),
+                updatedAt: new Date().toISOString()
+            }));
+
+            await saveFixedExpenseTemplates(userId, templatesWithTimestamp);
+            setFixedExpenseTemplates(templatesWithTimestamp);
+            showToast('기본 템플릿으로 초기화되었습니다 ✓', 'success');
+        } catch (error) {
+            console.error('기본 템플릿 초기화 실패:', error);
+            showToast('초기화 실패', 'error');
+        }
+    }, [userId]);
+
     const value = useMemo(() => ({
         dbData,
         setDbData,
         categories,
         setCategories,
+        fixedExpenseTemplates,
+        setFixedExpenseTemplates,
         currentYear,
         setCurrentYear,
         currentMonth,
@@ -278,6 +413,8 @@ export const BudgetProvider = ({ children, userId }) => {
         setActiveTab,
         isCategoryModalOpen,
         setIsCategoryModalOpen,
+        isFixedExpenseModalOpen,
+        setIsFixedExpenseModalOpen,
         isInputModalOpen,
         setIsInputModalOpen,
         editingId,
@@ -292,9 +429,16 @@ export const BudgetProvider = ({ children, userId }) => {
         manualSync,
         saveIfDirty, // 노출
         userId,
-    }), [dbData, categories, currentYear, currentMonth, activeTab,
-        isCategoryModalOpen, isInputModalOpen, editingId, inputForm, toast,
-        isLoading, syncStatus, manualSync, saveIfDirty, userId]);
+        // 고정비 관련
+        handleSaveFixedExpenseTemplate,
+        handleDeleteFixedExpenseTemplate,
+        handleToggleFixedExpenseActive,
+        handleInitializeDefaultTemplates,
+    }), [dbData, categories, fixedExpenseTemplates, currentYear, currentMonth, activeTab,
+        isCategoryModalOpen, isFixedExpenseModalOpen, isInputModalOpen, editingId, inputForm, toast,
+        isLoading, syncStatus, manualSync, saveIfDirty, userId,
+        handleSaveFixedExpenseTemplate, handleDeleteFixedExpenseTemplate,
+        handleToggleFixedExpenseActive, handleInitializeDefaultTemplates]);
 
     return <BudgetContext.Provider value={value}>{children}</BudgetContext.Provider>;
 };

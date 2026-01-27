@@ -16,12 +16,23 @@ import SettingsView from "./components/views/SettingsView";
 // Modals
 import ItemInputModal from "./components/modals/ItemInputModal";
 import CategoryManageModal from "./components/modals/CategoryManageModal";
+import FixedExpenseModal from "./components/modals/FixedExpenseModal";
 
 // Common
 import Toast from "./components/common/Toast";
 
 export default function App() {
-  const { activeTab } = useBudgetContext();
+  const {
+    activeTab,
+    isFixedExpenseModalOpen,
+    setIsFixedExpenseModalOpen,
+    fixedExpenseTemplates,
+    categories,
+    handleSaveFixedExpenseTemplate,
+    handleDeleteFixedExpenseTemplate,
+    handleToggleFixedExpenseActive,
+    handleInitializeDefaultTemplates
+  } = useBudgetContext();
   const { openCreateModal } = useBudget();
 
   const renderView = () => {
@@ -63,6 +74,16 @@ export default function App() {
         {/* Modals */}
         <ItemInputModal />
         <CategoryManageModal />
+        <FixedExpenseModal
+          isOpen={isFixedExpenseModalOpen}
+          onClose={() => setIsFixedExpenseModalOpen(false)}
+          templates={fixedExpenseTemplates}
+          categories={categories}
+          onSave={handleSaveFixedExpenseTemplate}
+          onDelete={handleDeleteFixedExpenseTemplate}
+          onToggleActive={handleToggleFixedExpenseActive}
+          onInitializeDefaults={handleInitializeDefaultTemplates}
+        />
 
         {/* Toast Notifications */}
         <Toast />
